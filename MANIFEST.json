@@ -1,6 +1,6 @@
 {
   "package": "FloodGuard Village (FGV) — SOBAT Competition 2026",
-  "generated_at": "2026-10-13 21:41:10 +0700",
+  "generated_at": "2026-10-13 21:44:54 +0700",
   "files": [
     {
       "path": ".gitattributes",
@@ -14,8 +14,8 @@
     },
     {
       "path": "BUILD_SHARE.example.py",
-      "size_bytes": 3717,
-      "sha256": "b27c907bc64618c22604f94f67aaba439b9d65b70eac72808d6679026bb21751"
+      "size_bytes": 3741,
+      "sha256": "6910981e86bf76c009624969384f2244627d54fafef5c8f5e1e9db22b8a6c492"
     },
     {
       "path": "config/secrets.example.h",

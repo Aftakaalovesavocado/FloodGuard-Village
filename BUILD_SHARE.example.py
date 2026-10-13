@@ -77,7 +77,7 @@ def main() -> None:
             continue
         if src.is_dir():
             shutil.copytree(src, dst, dirs_exist_ok=True,
-                            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".firebase", ".firebaserc"))
+                            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".firebase", ".firebaserc", ".git", "node_modules"))
         else:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
