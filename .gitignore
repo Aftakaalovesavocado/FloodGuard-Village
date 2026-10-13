@@ -1,0 +1,26 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Secrets
+.env
+*.env
+config/secrets*.h
+!config/secrets.example.h
+
+# Build/cache
+__pycache__/
+*.pyc
+*.cache
+.firebase/
+node_modules/
+dist/
+build/
+
+# Artifacts not worth committing
+*.zip
+*.mov
+*.mp4
+*.heic

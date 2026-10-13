@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sungai Watch — Monitoring Banjir Desa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a1622;
+    --bg-panel: #101f30;
+    --bg-panel-raised: #142639;
+    --line: #1e3348;
+    --line-soft: #17293b;
+    --text-primary: #eaf2f8;
+    --text-secondary: #7f97ac;
+    --text-dim: #4d6478;
+    --water: #3ec6e0;
+    --water-dim: #1d5b6b;
+    --aman: #3ecf8e;
+    --waspada: #f0c93a;
+    --siaga: #f0a63a;
+    --bahaya: #e85d4e;
+    --font-display: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    background-image:
+      radial-gradient(ellipse 800px 400px at 20% -10%, rgba(62,198,224,0.07), transparent),
+      radial-gradient(ellipse 600px 400px at 90% 10%, rgba(240,166,58,0.05), transparent);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+
+  .brand-mark {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--water), var(--water-dim));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--bg-deep);
+    flex-shrink: 0;
+  }
+
+  .brand-text h1 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .brand-text p {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .live-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 7px 14px 7px 10px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--aman);
+    box-shadow: 0 0 0 0 rgba(62,207,142,0.6);
+    animation: pulse 2s infinite;
+  }
+  .dot.offline { background: var(--text-dim); animation: none; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(62,207,142,0.5); }
+    70% { box-shadow: 0 0 0 7px rgba(62,207,142,0); }
+    100% { box-shadow: 0 0 0 0 rgba(62,207,142,0); }
+  }
+
+  /* ── STATUS HERO ── */
+  .hero {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s ease;
+  }
+
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .status-label {
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .status-value {
+    font-family: var(--font-display);
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    transition: color 0.4s ease;
+  }
+
+  .status-sub {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.5;
+  }
+
+  .risk-ring-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .risk-ring-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  svg.ring { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--line); stroke-width: 10; }
+  .ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray 0.6s ease, stroke 0.4s ease; }
+  .ring-text {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    fill: var(--text-primary);
+    transform: rotate(90deg);
+  }
+  .ring-percent { font-size: 12px; fill: var(--text-secondary); transform: rotate(90deg); }
+
+  .wavebar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 5px;
+    background: var(--line-soft);
+    z-index: 1;
+  }
+  .wavebar-fill {
+    height: 100%;
+    transition: width 0.6s ease, background 0.4s ease;
+  }
+
+  /* ── GRID CARDS ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+
+  .card-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .card-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .card-value .unit {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+
+  .card-foot {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  /* Water level mini bar */
+  .mini-water {
+    margin-top: 12px;
+    height: 6px;
+    background: var(--line-soft);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .mini-water-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--water-dim), var(--water));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── PANEL: GRAFIK ── */
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .panel-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .panel-title span { color: var(--text-dim); font-weight: 400; }
+
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  #chart { width: 100%; height: 200px; display: block; }
+
+  /* ── PANEL: BMKG ── */
+  .bmkg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+  .bmkg-item {
+    padding: 14px;
+    background: var(--bg-panel-raised);
+    border-radius: 10px;
+    border: 1px solid var(--line-soft);
+  }
+  .bmkg-item-label {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .bmkg-item-value {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .bmkg-loc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bmkg-loc strong { color: var(--text-primary); font-weight: 600; }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 30px;
+    line-height: 1.6;
+  }
+  footer a { color: var(--water); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .status-value { font-size: 34px; }
+    .hero { padding: 22px; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">SW</div>
+      <div class="brand-text">
+        <h1>SUNGAI WATCH</h1>
+        <p>Sistem Prediksi Dini Banjir — Wilayah_Target, Kecamatan_Target</p>
+      </div>
+    </div>
+    <div class="live-pill">
+      <div class="dot" id="liveDot"></div>
+      <span id="liveText">Menghubungkan...</span>
+    </div>
+  </header>
+
+  <!-- HERO STATUS -->
+  <div class="hero" id="heroCard">
+    <div class="hero-top">
+      <div>
+        <div class="status-label">Status Saat Ini</div>
+        <div class="status-value" id="statusValue">—</div>
+        <div class="status-sub" id="statusSub">Menunggu data pertama dari sensor lapangan...</div>
+      </div>
+      <div class="risk-ring-wrap">
+        <svg class="ring" width="120" height="120" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="50"></circle>
+          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="50" stroke="#3ec6e0" stroke-dasharray="0 314"></circle>
+          <text x="60" y="56" text-anchor="middle" class="ring-text" id="ringText">0</text>
+          <text x="60" y="74" text-anchor="middle" class="ring-percent">RISK %</text>
+        </svg>
+      </div>
+    </div>
+    <div class="wavebar"><div class="wavebar-fill" id="wavebarFill" style="width:0%; background:#3ec6e0;"></div></div>
+  </div>
+
+  <!-- GRID METRICS -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-label">💧 Ketinggian Air</div>
+      <div class="card-value"><span id="tinggiAir">0</span><span class="unit">%</span></div>
+      <div class="mini-water"><div class="mini-water-fill" id="miniWater" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-label">🌊 Debit Aliran</div>
+      <div class="card-value"><span id="debitAir">0</span><span class="unit">L/min</span></div>
+      <div class="card-foot" id="debitFoot">Belum ada aliran terdeteksi</div>
+    </div>
+    <div class="card">
+      <div class="card-label">⏱ Estimasi Meluap</div>
+      <div class="card-value" id="estimasiMeluap" style="font-size:19px;">—</div>
+      <div class="card-foot">Berdasar tren 6 menit terakhir</div>
+    </div>
+    <div class="card">
+      <div class="card-label">🕐 Update Terakhir</div>
+      <div class="card-value" id="lastUpdate" style="font-size:16px;">—</div>
+      <div class="card-foot" id="lastUpdateAgo">—</div>
+    </div>
+  </div>
+
+  <!-- GRAFIK -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Tren Ketinggian & Risiko <span>— 100 pembacaan terakhir</span></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3ec6e0"></div> Ketinggian %</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e85d4e"></div> Risk %</div>
+      </div>
+    </div>
+    <svg id="chart" viewBox="0 0 1000 200" preserveAspectRatio="none"></svg>
+  </div>
+
+  <!-- BMKG -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Data Cuaca <span>— BMKG real-time</span></div>
+    </div>
+    <div class="bmkg-loc">📍 <strong id="bmkgLokasi">—</strong></div>
+    <div class="bmkg-grid">
+      <div class="bmkg-item"><div class="bmkg-item-label">Kondisi</div><div class="bmkg-item-value" id="bmkgKondisi">—</div></div>
+      <div class="bmkg-item"><div class="bmkg-item-label">Suhu</div><div class="bmkg-item-value" id="bmkgSuhu">—</div></div>
+      <div class="bmkg-item"><div class="bmkg-item-label">Kelembapan</div><div class="bmkg-item-value" id="bmkgKelembapan">—</div></div>
+      <div class="bmkg-item"><div class="bmkg-item-label">Curah Hujan</div><div class="bmkg-item-value" id="bmkgHujan">—</div></div>
+      <div class="bmkg-item"><div class="bmkg-item-label">Tutupan Awan</div><div class="bmkg-item-value" id="bmkgAwan">—</div></div>
+      <div class="bmkg-item"><div class="bmkg-item-label">Angin</div><div class="bmkg-item-value" id="bmkgAngin">—</div></div>
+    </div>
+  </div>
+
+  <footer>
+    Sumber data cuaca: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)<br>
+    Sungai Watch MVP — Sistem Prediksi Dini Banjir Berbasis IoT
+  </footer>
+
+</div>
+
+<script>
+const API_BASE = ''; // sama domain dengan server, kosongkan jika 1 server
+
+const statusColors = {
+  AMAN:    { c: '#3ecf8e', label: 'AMAN' },
+  WASPADA: { c: '#f0c93a', label: 'WASPADA' },
+  SIAGA:   { c: '#f0a63a', label: 'SIAGA' },
+  BAHAYA:  { c: '#e85d4e', label: 'BAHAYA' }
+};
+
+const statusMsg = {
+  AMAN: 'Kondisi sungai normal. Tidak ada indikasi risiko dalam waktu dekat.',
+  WASPADA: 'Ada peningkatan indikator. Pantau terus perkembangan kondisi.',
+  SIAGA: 'Risiko meningkat signifikan. Bersiap untuk tindakan pencegahan.',
+  BAHAYA: 'Risiko tinggi terdeteksi. Segera lakukan langkah evakuasi/mitigasi.'
+};
+
+function timeAgo(isoString) {
+  if (!isoString) return '—';
+  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
+  if (diff < 5) return 'Baru saja';
+  if (diff < 60) return diff + ' detik lalu';
+  if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
+  return Math.floor(diff / 3600) + ' jam lalu';
+}
+
+function renderChart(histori) {
+  const svg = document.getElementById('chart');
+  if (!histori || histori.length < 2) {
+    svg.innerHTML = '<text x="500" y="100" text-anchor="middle" fill="#4d6478" font-family="JetBrains Mono" font-size="13">Menunggu data histori...</text>';
+    return;
+  }
+
+  const W = 1000, H = 200, PAD = 10;
+  const n = histori.length;
+  const stepX = (W - PAD * 2) / Math.max(n - 1, 1);
+
+  function pathFor(key) {
+    return histori.map((d, i) => {
+      const x = PAD + i * stepX;
+      const val = Math.max(0, Math.min(100, d[key] || 0));
+      const y = H - PAD - (val / 100) * (H - PAD * 2);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+  }
+
+  const gridLines = [0, 25, 50, 75, 100].map(v => {
+    const y = H - PAD - (v / 100) * (H - PAD * 2);
+    return `<line x1="${PAD}" y1="${y}" x2="${W-PAD}" y2="${y}" stroke="#17293b" stroke-width="1"/>`;
+  }).join('');
+
+  svg.innerHTML = `
+    ${gridLines}
+    <path d="${pathFor('tinggi_air_persen')}" fill="none" stroke="#3ec6e0" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="${pathFor('risk_level')}" fill="none" stroke="#e85d4e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+  `;
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch(API_BASE + '/api/data');
+    const d = await res.json();
+
+    document.getElementById('liveDot').classList.remove('offline');
+    document.getElementById('liveText').textContent = 'Live';
+
+    const statusKey = (d.status || 'AMAN').toUpperCase();
+    const sc = statusColors[statusKey] || statusColors.AMAN;
+
+    document.getElementById('statusValue').textContent = sc.label;
+    document.getElementById('statusValue').style.color = sc.c;
+    document.getElementById('statusSub').textContent = statusMsg[statusKey] || '';
+    document.getElementById('heroCard').style.borderColor = sc.c + '55';
+
+    const risk = Math.max(0, Math.min(100, d.risk_level || 0));
+    const circumference = 2 * Math.PI * 50;
+    const dash = (risk / 100) * circumference;
+    const ring = document.getElementById('ringFg');
+    ring.setAttribute('stroke-dasharray', `${dash} ${circumference}`);
+    ring.setAttribute('stroke', sc.c);
+    document.getElementById('ringText').textContent = Math.round(risk);
+
+    document.getElementById('wavebarFill').style.width = risk + '%';
+    document.getElementById('wavebarFill').style.background = sc.c;
+
+    document.getElementById('tinggiAir').textContent = (d.tinggi_air_persen || 0).toFixed(1);
+    document.getElementById('miniWater').style.width = Math.max(0, Math.min(100, d.tinggi_air_persen || 0)) + '%';
+
+    document.getElementById('debitAir').textContent = (d.debit_lpm || 0).toFixed(1);
+    document.getElementById('debitFoot').textContent = (d.debit_lpm || 0) > 0 ? 'Aliran terdeteksi' : 'Belum ada aliran terdeteksi';
+
+    document.getElementById('estimasiMeluap').textContent = d.estimasi_meluap || '—';
+
+    document.getElementById('lastUpdate').textContent = d.last_update ? new Date(d.last_update).toLocaleTimeString('id-ID') : '—';
+    document.getElementById('lastUpdateAgo').textContent = timeAgo(d.last_update);
+
+    document.getElementById('bmkgLokasi').textContent = (d.lokasi_desa || '—') + ', ' + (d.lokasi_kecamatan || '—');
+    document.getElementById('bmkgKondisi').textContent = d.kondisi_cuaca || '—';
+    document.getElementById('bmkgSuhu').textContent = (d.suhu !== undefined ? d.suhu + ' °C' : '—');
+    document.getElementById('bmkgKelembapan').textContent = (d.kelembapan !== undefined ? d.kelembapan + ' %' : '—');
+    document.getElementById('bmkgHujan').textContent = (d.curah_hujan !== undefined ? d.curah_hujan + ' mm' : '—');
+    document.getElementById('bmkgAwan').textContent = (d.tutupan_awan !== undefined ? d.tutupan_awan + ' %' : '—');
+    document.getElementById('bmkgAngin').textContent = (d.kecepatan_angin !== undefined ? d.kecepatan_angin + ' km/j ' + (d.arah_angin || '') : '—');
+
+  } catch (err) {
+    document.getElementById('liveDot').classList.add('offline');
+    document.getElementById('liveText').textContent = 'Offline';
+    console.error('Gagal fetch data:', err);
+  }
+}
+
+async function fetchHistori() {
+  try {
+    const res = await fetch(API_BASE + '/api/histori');
+    const histori = await res.json();
+    renderChart(histori);
+  } catch (err) {
+    console.error('Gagal fetch histori:', err);
+  }
+}
+
+fetchData();
+fetchHistori();
+setInterval(fetchData, 5000);
+setInterval(fetchHistori, 10000);
+</script>
+
+</body>
+</html>

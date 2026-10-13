@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FloodGuard Village — Dashboard Tahap 3</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root {
+    --bg: #0a1622; --panel: #101f30; --panel2: #142639; --line: #1e3348;
+    --text: #eaf2f8; --dim: #7f97ac; --water: #3ec6e0;
+    --aman: #3ecf8e; --waspada: #f0c93a; --siaga: #f0a63a; --bahaya: #e85d4e;
+    --mono: 'JetBrains Mono', 'Consolas', monospace; --body: 'Inter', 'Segoe UI', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--body);
+    min-height: 100vh; padding: 20px 16px 48px;
+    background-image: radial-gradient(ellipse 900px 420px at 15% -8%, rgba(62,198,224,.08), transparent);
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .map-section { margin-bottom:20px; }
+  .map-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:9px; }
+  .map-head h2 { font-family:var(--mono); font-size:12px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+  .map-meta { display:flex; gap:12px; align-items:center; color:var(--dim); font:11px var(--mono); }
+  .map-count { color:var(--water); }
+  #map { height:380px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#102232; z-index:0; }
+  .leaflet-container { font-family:var(--body); background:#102232; }
+  .leaflet-control-layers, .leaflet-bar a { background:#101f30; color:var(--text); border-color:#29445b; }
+  .leaflet-control-layers label { color:var(--text); font-size:12px; }
+  .leaflet-control-attribution { background:rgba(10,22,34,.82)!important; color:#a8bdcc!important; }
+  .leaflet-control-attribution a { color:var(--water)!important; }
+  .node-marker { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border:2px solid #eaf2f8; border-radius:50%; color:#06121c; font:800 11px var(--mono); box-shadow:0 0 0 5px rgba(62,198,224,.18),0 3px 12px #0008; }
+  .node-marker.n2 { box-shadow:0 0 0 5px rgba(62,207,142,.18),0 3px 12px #0008; }
+  .node-marker.n3 { box-shadow:0 0 0 5px rgba(240,166,58,.18),0 3px 12px #0008; }
+  .map-legend { display:flex; gap:14px; flex-wrap:wrap; padding:9px 2px 0; color:var(--dim); font:11px var(--mono); }
+  .map-legend span { display:flex; align-items:center; gap:6px; }
+  .map-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .map-note { margin-left:auto; }
+  @media(max-width:640px) { #map { height:320px; } .map-meta { width:100%; justify-content:space-between; } }
+  header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+           margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .brand { display:flex; gap:12px; align-items:center; }
+  .mark { width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,var(--water),#1d5b6b);
+          display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:800; font-size:17px; color:#06121c; }
+  h1 { font-family:var(--mono); font-size:17px; }
+  .sub { font-size:12.5px; color:var(--dim); margin-top:2px; }
+  .lastupd { font-family:var(--mono); font-size:12px; color:var(--dim); }
+
+  .banner { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+            background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--aman);
+            border-radius:12px; padding:16px 20px; margin-bottom:20px; }
+  .banner .big { font-family:var(--mono); font-size:26px; font-weight:800; letter-spacing:.02em; }
+  .banner .aksi { font-size:13px; color:var(--dim); max-width:520px; }
+  .banner .pola { font-family:var(--mono); font-size:15px; font-weight:700; padding:8px 14px;
+                  border-radius:9px; background:var(--panel2); border:1px solid var(--line); }
+
+  .grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:20px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .card h3 { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--dim);
+             text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; display:flex; justify-content:space-between; }
+  .lvl-big { font-family:var(--mono); font-size:34px; font-weight:800; line-height:1.05; }
+  .lvl-big small { font-size:15px; color:var(--dim); font-weight:600; }
+  .row { display:flex; justify-content:space-between; font-size:13px; margin-top:7px; color:var(--dim); }
+  .row b { color:var(--text); font-family:var(--mono); font-weight:600; }
+  .badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
+  .b-aman{background:rgba(62,207,142,.14); color:var(--aman);} .b-waspada{background:rgba(240,201,58,.14); color:var(--waspada);}
+  .b-siaga{background:rgba(240,166,58,.15); color:var(--siaga);} .b-bahaya{background:rgba(232,93,78,.16); color:var(--bahaya);}
+  .b-off{background:rgba(127,151,172,.14); color:var(--dim);}
+  .bar { height:7px; border-radius:4px; background:var(--panel2); margin-top:11px; overflow:hidden; }
+  .bar i { display:block; height:100%; border-radius:4px; background:var(--water); transition:width .4s, background .4s; }
+  .node-meta { display:flex; justify-content:space-between; gap:8px; margin-top:10px; color:var(--dim); font:10px var(--mono); flex-wrap:wrap; }
+  .radio-strip { display:flex; gap:12px; flex-wrap:wrap; margin:0 0 14px; padding:10px 14px; color:var(--dim); background:var(--panel); border:1px solid var(--line); border-radius:10px; font:11px var(--mono); }
+  .radio-strip b { color:var(--text); }
+
+  .charts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:14px; }
+  .chart-card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; min-width:0; }
+  .chart-card h3 { font-family:var(--mono); font-size:12px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; }
+  canvas { width:100%; height:190px; display:block; }
+  .fusion-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; background:var(--panel); border:1px solid var(--line); border-radius:10px; color:var(--dim); font:12px var(--mono); }
+  .fusion-bar b { color:var(--text); font-weight:600; }
+  .fusion-items { display:flex; gap:20px; flex-wrap:wrap; }
+  .unavailable { color:var(--waspada)!important; }
+  .events { margin-top:14px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; overflow:auto; }
+  .events h3 { font:700 12px var(--mono); color:var(--dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; }
+  .events table { width:100%; border-collapse:collapse; font:12px var(--mono); min-width:520px; }
+  .events th,.events td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  .events th { color:var(--dim); font-weight:500; }
+  .events td { color:var(--text); }
+  .empty-event { color:var(--dim)!important; text-align:center!important; padding:18px!important; }
+  @media(max-width:760px) { .charts { grid-template-columns:1fr; } }
+  .legend { display:flex; gap:16px; margin-top:8px; font-size:12px; color:var(--dim); font-family:var(--mono); }
+  .legend i { display:inline-block; width:10px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+  .note { text-align:center; color:var(--dim); font-size:12px; margin-top:14px; font-family:var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">FGV</div>
+      <div>
+        <h1>FloodGuard Village</h1>
+        <div class="sub">Prototipe Tahap 3 · 3 node (Hulu/Tengah/Hilir) + Pattern Classifier</div>
+      </div>
+    </div>
+    <div class="lastupd" id="lastupd">memuat…</div>
+  </header>
+
+  <section class="map-section" aria-labelledby="map-title">
+    <div class="map-head">
+      <h2 id="map-title">Peta Posisi Node · GPS live</h2>
+      <div class="map-meta"><span id="map-count" class="map-count">0/3 FIX</span><span id="map-center">Menunggu koordinat node…</span></div>
+    </div>
+    <div id="map" role="application" aria-label="Peta posisi node FloodGuard Village"></div>
+    <div class="map-legend">
+      <span><i class="map-dot" style="background:#3ec6e0"></i>Node 1 · Hulu</span>
+      <span><i class="map-dot" style="background:#3ecf8e"></i>Node 2 · Tengah</span>
+      <span><i class="map-dot" style="background:#f0a63a"></i>Node 3 · Hilir</span>
+      <span class="map-note">Marker hanya tampil jika GPS fix valid</span>
+    </div>
+  </section>
+
+  <div class="banner" id="banner">
+    <div>
+      <div class="big" id="status-global">—</div>
+      <div class="aksi" id="aksi">Menunggu data dari gateway…</div>
+    </div>
+    <div class="pola" id="pola">—</div>
+  </div>
+
+  <div class="grid3" id="grid3"></div>
+  <section class="radio-strip" aria-label="Statistik gateway dan LoRa">
+    <span>LoRa RX <b id="radio-rx">—</b></span><span>CRC reject <b id="radio-crc">—</b></span>
+    <span>Paket hilang <b id="radio-lost">—</b></span><span>PDR <b id="radio-pdr">—</b></span>
+    <span>HTTP POST OK/gagal <b id="radio-http">—</b></span><span>Wi-Fi RSSI <b id="wifi-rssi">—</b></span>
+  </section>
+
+  <section class="charts">
+    <div class="chart-card">
+      <h3>Risiko Lokal per Node · LIVE</h3>
+      <canvas id="risk-chart" width="700" height="190"></canvas>
+      <div class="legend">
+        <span><i style="background:#3ec6e0"></i>Hulu</span>
+        <span><i style="background:#3ecf8e"></i>Tengah</span>
+        <span><i style="background:#f0a63a"></i>Hilir</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Input Hujan Layer 1 · bukan pengukuran</h3>
+      <canvas id="rain-chart" width="700" height="190"></canvas>
+      <div class="row"><span>Sumber data hujan</span><b id="rain-source" class="unavailable">Belum tersedia di gateway</b></div>
+    </div>
+  </section>
+
+  <section class="fusion-bar" aria-label="Status fusi dan sumber cuaca">
+    <div class="fusion-items">
+      <span>POLA SPASIAL <b id="fusion-spatial">—</b></span>
+      <span>BACKWATER <b id="sumbatan">—</b></span>
+      <span>HUJAN <b id="fusion-rain" class="unavailable">belum terhubung</b></span>
+      <span>BMKG <b id="fusion-bmkg" class="unavailable">belum terhubung</b></span>
+    </div>
+    <b id="siren-status" class="unavailable">Sirene: status belum tersedia</b>
+  </section>
+
+  <section class="events">
+    <h3>Riwayat Transisi Level</h3>
+    <table>
+      <thead><tr><th>Waktu</th><th>Node</th><th>Transisi</th><th>Risk</th><th>Posisi GPS</th></tr></thead>
+      <tbody id="event-rows"><tr><td colspan="5" class="empty-event">Belum ada transisi level tercatat</td></tr></tbody>
+    </table>
+  </section>
+
+  <div class="note" id="lag"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const STATUS_COLOR = { "AMAN":"var(--aman)", "WASPADA":"var(--waspada)", "SIAGA":"var(--siaga)", "BAHAYA":"var(--bahaya)" };
+const POLA_COLOR = { AMAN:"var(--aman)", KIRIMAN_HULU:"var(--siaga)", BACKWATER:"var(--bahaya)",
+                     LOKAL:"var(--waspada)", SERENTAK:"var(--bahaya)", CAMPURAN:"var(--dim)" };
+const NODE_COLOR = { 1:"#3ec6e0", 2:"#3ecf8e", 3:"#f0a63a" };
+
+// Leaflet map: marker hanya dibuat untuk koordinat valid dari paket GPS.
+let map = null;
+const nodeMarkers = {};
+let hasAutoFit = false;
+function initMap() {
+  if (!window.L) {
+    document.getElementById("map-center").textContent = "Leaflet gagal dimuat · cek koneksi";
+    return;
+  }
+  map = L.map("map", { scrollWheelZoom:true }).setView([-2.5, 118], 5);
+  const light = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains:"abcd", maxZoom:20
+  });
+  const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution:'Tiles &copy; <a href="https://www.esri.com/">Esri</a>', maxZoom:19
+  });
+  const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom:19
+  });
+  satellite.addTo(map);
+  L.control.layers({"Terang (Carto HD)":light,"Satelit (Esri)":satellite,"OSM":osm},null,{collapsed:false}).addTo(map);
+  setTimeout(() => map.invalidateSize(), 100);
+}
+function hasGpsFix(n) {
+  return n && n.gps_fix === true && n.lat != null && n.lon != null && n.lat !== "" && n.lon !== "" &&
+    Number.isFinite(Number(n.lat)) && Number.isFinite(Number(n.lon)) &&
+    Math.abs(Number(n.lat)) <= 90 && Math.abs(Number(n.lon)) <= 180;
+}
+function updateMap(d) {
+  if (!map) return;
+  const points = [];
+  let fixes = 0;
+  for (const i of [1,2,3]) {
+    const n = d.nodes && d.nodes[i];
+    if (!hasGpsFix(n)) {
+      if (nodeMarkers[i]) { map.removeLayer(nodeMarkers[i]); delete nodeMarkers[i]; }
+      continue;
+    }
+    const latlng = [Number(n.lat), Number(n.lon)];
+    fixes++; points.push(latlng);
+    const color = NODE_COLOR[i];
+    const icon = L.divIcon({className:"", html:`<div class="node-marker n${i}" style="background:${color}">N${i}</div>`, iconSize:[34,34], iconAnchor:[17,17]});
+    const popup = `<b>NODE ${i} · ${n.nama || ["","HULU","TENGAH","HILIR"][i]}</b><br>${latlng[0].toFixed(6)}, ${latlng[1].toFixed(6)}<br>Status: ${n.online ? (n.status || "online") : "offline"}`;
+    if (!nodeMarkers[i]) nodeMarkers[i] = L.marker(latlng,{icon}).addTo(map);
+    else nodeMarkers[i].setLatLng(latlng).setIcon(icon);
+    nodeMarkers[i].bindPopup(popup);
+  }
+  document.getElementById("map-count").textContent = `${fixes}/3 FIX`;
+  document.getElementById("map-center").textContent = fixes ? `${fixes} node kirim koordinat valid` : "Menunggu GPS fix dari node…";
+  if (points.length && !hasAutoFit) {
+    if (points.length === 1) map.setView(points[0], 15);
+    else map.fitBounds(L.latLngBounds(points), {padding:[36,36], maxZoom:15});
+    hasAutoFit = true;
+  }
+}
+initMap();
+
+function badge(status, online) {
+  if (!online) return '<span class="badge b-off">OFFLINE</span>';
+  const s = (status||"AMAN").toUpperCase();
+  const cls = { AMAN:"b-aman", WASPADA:"b-waspada", SIAGA:"b-siaga", BAHAYA:"b-bahaya" }[s] || "b-off";
+  return `<span class="badge ${cls}">${s}</span>`;
+}
+
+function render(d) {
+  window.latestDashboardData = d;
+  document.getElementById("lastupd").textContent = d.last_update ? "update " + new Date(d.last_update).toLocaleTimeString("id-ID") : (REMOTE_MODE && d.gateway_uptime_ms != null ? `Gateway uptime ${Math.floor(Number(d.gateway_uptime_ms)/1000)}s` : "belum ada data");
+  updateMap(d);
+
+  // banner global
+  const st = (d.status_global||"AMAN").toUpperCase();
+  const onlineCount = [1,2,3].filter(i => d.nodes && d.nodes[i] && d.nodes[i].online).length;
+  const displayStatus = onlineCount === 0 ? "MENUNGGU DATA" : st;
+  const stEl = document.getElementById("status-global");
+  stEl.textContent = displayStatus;
+  stEl.style.color = onlineCount === 0 ? "var(--dim)" : (STATUS_COLOR[st] || "var(--text)");
+  const bn = document.getElementById("banner");
+  bn.style.borderLeftColor = onlineCount === 0 ? "var(--dim)" : (STATUS_COLOR[st] || "var(--dim)");
+  document.getElementById("aksi").textContent = onlineCount === 0 ? "Belum ada node online · status risiko belum dapat disimpulkan" : `${onlineCount < 3 ? `DATA PARSIAL ${onlineCount}/3 · ` : ""}${d.aksi || "—"}`;
+  const pEl = document.getElementById("pola");
+  pEl.textContent = d.pola || "—";
+  pEl.style.color = POLA_COLOR[d.pola] || "var(--text)";
+  const radio=d.radio || {};
+  document.getElementById("fusion-spatial").textContent = d.pola ? `${d.pola} · ${d.pola_desc || ""}` : "menunggu pola";
+  document.getElementById("radio-rx").textContent = radio.rx_ok ?? "—";
+  document.getElementById("radio-crc").textContent = radio.crc_bad ?? "—";
+  document.getElementById("radio-lost").textContent = radio.lost ?? "—";
+  document.getElementById("radio-pdr").textContent = radio.pdr_pct != null ? `${Number(radio.pdr_pct).toFixed(1)}%` : "—";
+  document.getElementById("radio-http").textContent = `${radio.http_ok ?? "—"} / ${radio.http_fail ?? "—"}`;
+  document.getElementById("wifi-rssi").textContent = radio.wifi_rssi_dbm != null ? `${radio.wifi_rssi_dbm} dBm` : "—";
+  document.getElementById("sumbatan").textContent = d.konfirmasi_sumbatan != null ? `Backwater: ${["tanpa info","sumbatan KUAT","debit stagnan","debit naik"][d.konfirmasi_sumbatan] || "—"}` : "";
+  // Curah hujan/BMKG dan sirene belum ada di payload gateway FGV saat ini.
+  document.getElementById("fusion-rain").textContent = d.rain_mm3h != null ? `${Number(d.rain_mm3h).toFixed(1)} mm/3jam${d.rain_source === "DISABLED_DEMO_CONSTANT" ? " · demo" : ""}` : "belum tersedia";
+  document.getElementById("fusion-bmkg").textContent = d.bmkg_status ? `${d.bmkg_status}${d.bmkg_tp_mm3h != null ? ` · ${d.bmkg_tp_mm3h} mm/3jam` : ""}` : "belum terhubung";
+  document.getElementById("siren-status").textContent = d.siren_status ? `Sirene: ${d.siren_status}` : "Sirene: status belum tersedia";
+  document.getElementById("fusion-rain").classList.toggle("unavailable", d.rain_mm3h == null);
+  document.getElementById("fusion-bmkg").classList.toggle("unavailable", !d.bmkg_status);
+  document.getElementById("siren-status").classList.toggle("unavailable", !d.siren_status);
+  document.getElementById("rain-source").textContent = d.rain_source === "DISABLED_DEMO_CONSTANT" ? "Konstanta 0 mm/3jam · bukan pengukuran" : (d.rain_source || "Belum tersedia di gateway");
+      document.getElementById("rain-source").classList.toggle("unavailable", d.rain_source === "DISABLED_DEMO_CONSTANT" || d.rain_mm3h == null);
+  document.getElementById("sumbatan").textContent =
+    d.konfirmasi_sumbatan != null ? ("konfirmasi: " + ["tanpa info","sumbatan KUAT","debit stagnan","debit naik"][d.konfirmasi_sumbatan]) : "";
+
+  // kartu node
+  const g = document.getElementById("grid3");
+  g.innerHTML = "";
+  for (const i of [1,2,3]) {
+    const n = d.nodes[i];
+    const capacity = Number(n.chan_mm) > 0 ? Number(n.chan_mm) : 25;
+    const pct = (n.level_pct != null) ? Number(n.level_pct) : ((n.level_mm != null) ? Number(n.level_mm) / capacity * 100 : 0);
+    const lvlTxt = (n.level_mm != null) ? `${n.level_mm}<small> mm</small>` : "—";
+    const riskTxt = (n.risk != null) ? `risk ${n.risk} · ${n.status}` : "risk —";
+    const gpsText = n.gps_fix && n.lat != null && n.lon != null ? `${Number(n.lat).toFixed(5)}, ${Number(n.lon).toFixed(5)} · FIX` : "belum fix";
+    const iqText = n.iq != null ? Number(n.iq).toFixed(3) : "—";
+    const radioText = n.rssi_dbm != null ? `${n.rssi_dbm} dBm / ${n.snr_db ?? "—"} dB SNR` : "—";
+    const onlineText = n.online ? "ONLINE" : "OFFLINE";
+    const flagText = n.flags == null ? "—" : `0x${Number(n.flags).toString(16).padStart(2,"0").toUpperCase()}`;
+    g.innerHTML += `
+      <div class="card">
+        <h3>NODE ${i} · ${n.nama} ${badge(n.status, n.online)}</h3>
+        <div class="lvl-big" style="color:${STATUS_COLOR[n.status]||'var(--text)'}">${lvlTxt}
+          ${n.meluap ? '<small style="color:var(--bahaya)">MELUAP</small>' : ""}</div>
+        <div class="row"><span>Debit (Manning)</span><b>${n.q_lpm != null ? Number(n.q_lpm).toFixed(1)+" L/min" : "—"}</b></div>
+        <div class="row"><span>Kecepatan</span><b>${n.v_cms != null ? n.v_cms+" cm/s" : "—"}</b></div>
+        <div class="row"><span>Level / kapasitas</span><b>${n.level_pct != null ? Number(n.level_pct).toFixed(1)+"%" : (n.level_mm != null ? pct.toFixed(1)+"%" : "—")}</b></div>
+        <div class="row"><span>${riskTxt}</span><b>I_Q ${iqText}</b></div>
+        <div class="row"><span>GPS</span><b>${gpsText}</b></div>
+        <div class="bar"><i style="width:${Math.max(0,Math.min(100,pct))}%; ${pct>=75?'background:var(--bahaya)':pct>=25?'background:var(--waspada)':''}"></i></div>
+        <div class="node-meta"><span>${onlineText} · seq ${n.seq ?? "—"} · flags ${flagText}</span><span>LoRa ${radioText}</span></div>
+      </div>`;
+  }
+
+  document.getElementById("lag").textContent =
+    d.lag_hulu_hilir_ms != null ? `lag time hulu → hilir (klok gateway): ${d.lag_hulu_hilir_ms} ms` : "";
+}
+
+let histCache = [];
+let lastHistKey = "";
+const FIREBASE_DB = "https://GANTI_DENGAN_PROJECT_ID.firebaseio.com";
+const REMOTE_MODE = location.hostname.endsWith(".web.app") || location.hostname.endsWith(".firebaseapp.com");
+const liveEvents = [];
+const previousNodeStatus = {};
+let lastRemoteUpdate = null;
+function recordRemoteSnapshot(d) {
+  const snapshotId = d.last_update ?? d.gateway_uptime_ms ?? null;
+  if (snapshotId == null || snapshotId === lastRemoteUpdate) return;
+  lastRemoteUpdate = snapshotId;
+  for (const i of [1,2,3]) {
+    const n = d.nodes && d.nodes[i];
+    if (!n || !n.online) continue;
+    histCache.push({t:Date.now(),node:i,level_mm:n.level_mm,risk:n.risk,status:n.status,q_lpm:n.q_lpm});
+    if (histCache.length > 600) histCache.shift();
+    const prior = previousNodeStatus[i];
+    if (prior && n.status && n.status !== "-" && prior !== n.status) {
+      liveEvents.unshift({t:new Date().toISOString(),node:i,nama:n.nama,from:prior,to:n.status,risk:n.risk,lat:n.lat,lon:n.lon});
+      if (liveEvents.length > 100) liveEvents.pop();
+    }
+    if (n.status && n.status !== "-") previousNodeStatus[i] = n.status;
+  }
+}
+async function fetchCurrentData() {
+  const url = REMOTE_MODE ? `${FIREBASE_DB}/fgv/current.json` : "/api/data";
+  const res = await fetch(url,{cache:"no-store"});
+  if (!res.ok) throw new Error(`data API HTTP ${res.status}`);
+  const d=await res.json();
+  if (REMOTE_MODE && d) recordRemoteSnapshot(d);
+  return d;
+}
+async function fetchHistoryData() {
+  if (REMOTE_MODE) return histCache;
+  const res=await fetch("/api/histori",{cache:"no-store"});
+  if (!res.ok) throw new Error(`history API HTTP ${res.status}`);
+  return res.json();
+}
+async function fetchEventData() {
+  if (REMOTE_MODE) return liveEvents;
+  const res=await fetch("/api/events",{cache:"no-store"});
+  if (!res.ok) throw new Error(`events API HTTP ${res.status}`);
+  return res.json();
+}
+function drawRiskChart() {
+  const c = document.getElementById("risk-chart");
+  const ctx = c.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = c.width = Math.max(320, c.clientWidth) * dpr;
+  const H = c.height = 190 * dpr;
+  ctx.clearRect(0,0,W,H);
+  const pad = {l:36*dpr,r:10*dpr,t:10*dpr,b:22*dpr};
+  const x0=pad.l,x1=W-pad.r,y0=H-pad.b,y1=pad.t;
+  ctx.font=`${10*dpr}px monospace`; ctx.lineWidth=dpr; ctx.fillStyle="#7f97ac"; ctx.strokeStyle="#1e3348";
+  for (const y of [0,50,100]) {
+    const yy=y0-(y/100)*(y0-y1);
+    ctx.beginPath();ctx.moveTo(x0,yy);ctx.lineTo(x1,yy);ctx.stroke();ctx.fillText(String(y),5*dpr,yy+3*dpr);
+  }
+  const colors={1:"#3ec6e0",2:"#3ecf8e",3:"#f0a63a"};
+  for (const i of [1,2,3]) {
+    const s=histCache.filter(h=>Number(h.node)===i && h.risk!=null).slice(-60);
+    if (!s.length) continue;
+    ctx.strokeStyle=colors[i];ctx.lineWidth=2*dpr;ctx.beginPath();
+    s.forEach((p,j)=>{const x=x0+(j/Math.max(1,s.length-1))*(x1-x0);const y=y0-(Math.max(0,Math.min(100,Number(p.risk)))/100)*(y0-y1);j?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    ctx.stroke();
+  }
+  if (!histCache.some(h=>h.risk!=null)) {
+    ctx.fillStyle="#7f97ac";ctx.textAlign="center";ctx.fillText("Menunggu data risk dari gateway…",(x0+x1)/2,(y0+y1)/2);ctx.textAlign="left";
+  }
+}
+function drawRainChart() {
+  const c=document.getElementById("rain-chart"),ctx=c.getContext("2d"),dpr=window.devicePixelRatio||1;
+  const W=c.width=Math.max(320,c.clientWidth)*dpr,H=c.height=190*dpr;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle="#7f97ac";ctx.font=`${11*dpr}px monospace`;ctx.textAlign="center";
+  const rain = window.latestDashboardData && window.latestDashboardData.rain_mm3h;
+  const source = window.latestDashboardData && window.latestDashboardData.rain_source;
+  const isDemo = source === "DISABLED_DEMO_CONSTANT";
+  ctx.fillText(rain != null ? `Input fuzzy: ${Number(rain).toFixed(1)} mm/3jam` : "Input hujan tidak tersedia",W/2,H/2-8*dpr);
+  ctx.font=`${10*dpr}px monospace`;
+  ctx.fillText(isDemo ? "KONSTANTA DEMO · bukan data sensor/BMKG" : (source || "Sumber belum tersedia"),W/2,H/2+13*dpr);ctx.textAlign="left";
+}
+async function loadEvents() {
+  try {
+    const events=await (await fetch("/api/events")).json();
+    const tbody=document.getElementById("event-rows");
+    if (!events.length) { tbody.innerHTML='<tr><td colspan="5" class="empty-event">Belum ada transisi level tercatat</td></tr>'; return; }
+    tbody.innerHTML=events.map(e=>{
+      const pos=e.lat!=null&&e.lon!=null?`${Number(e.lat).toFixed(5)}, ${Number(e.lon).toFixed(5)}`:"—";
+      return `<tr><td>${new Date(e.t).toLocaleTimeString("id-ID")}</td><td>N${e.node} · ${e.nama}</td><td>${e.from} → ${e.to}</td><td>${e.risk}</td><td>${pos}</td></tr>`;
+    }).join("");
+  } catch (_) { document.getElementById("event-rows").innerHTML='<tr><td colspan="5" class="empty-event">Endpoint riwayat belum tersedia</td></tr>'; }
+}
+
+async function refresh() {
+  try {
+    const d = await fetchCurrentData();
+    if (!d) throw new Error("data cloud kosong");
+    render(d);
+    const h = await fetchHistoryData();
+    const key = JSON.stringify(h);
+    if (key !== lastHistKey) { histCache = h; lastHistKey = key; drawRiskChart(); }
+    const events = await fetchEventData();
+    if (REMOTE_MODE) {
+      const tbody=document.getElementById("event-rows");
+      if (!events.length) tbody.innerHTML='<tr><td colspan="5" class="empty-event">Menunggu transisi status berikutnya · riwayat mulai direkam saat dashboard dibuka</td></tr>';
+      else tbody.innerHTML=events.map(e=>`<tr><td>${new Date(e.t).toLocaleTimeString("id-ID")}</td><td>N${e.node} · ${e.nama}</td><td>${e.from} → ${e.to}</td><td>${e.risk ?? "—"}</td><td>${e.lat!=null&&e.lon!=null?`${Number(e.lat).toFixed(5)}, ${Number(e.lon).toFixed(5)}`:"—"}</td></tr>`).join("");
+    } else await loadEvents();
+    if (REMOTE_MODE) document.getElementById("lastupd").textContent = d.last_update ? `Firebase live · update ${new Date(d.last_update).toLocaleTimeString("id-ID")}` : "Firebase · menunggu gateway";
+  } catch (e) {
+    document.getElementById("lastupd").textContent = REMOTE_MODE ? "Firebase belum ada data · cek koneksi gateway" : "gateway/server tidak terjangkau";
+  }
+}
+refresh();
+drawRiskChart();
+drawRainChart();
+setInterval(refresh, 1000);
+window.addEventListener("resize", () => { drawRiskChart(); drawRainChart(); if (map) map.invalidateSize(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+{
+  "package": "FloodGuard Village (FGV) — SOBAT Competition 2026",
+  "generated_at": "2026-10-13 21:37:54 +0700",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size_bytes": 250,
+      "sha256": "fbad5e3238b40b3904b2d99f1b687ceec7b5487ac65cda3fb9cd100e54afdff2"
+    },
+    {
+      "path": "BUILD_SHARE.example.py",
+      "size_bytes": 3717,
+      "sha256": "b27c907bc64618c22604f94f67aaba439b9d65b70eac72808d6679026bb21751"
+    },
+    {
+      "path": "config/secrets.example.h",
+      "size_bytes": 346,
+      "sha256": "53de9313e3e84383c3644d9f8e95254b4b18a833fa44036cf9d93ac68de82958"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/database.rules.json",
+      "size_bytes": 92,
+      "sha256": "dcb8375b080e73f703679e14f93437c563de96921d4438c044439e7beceb26a2"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/firebase.json",
+      "size_bytes": 211,
+      "sha256": "8be0178ac0aa1f0dcc5de6ae30d148bb698f1879b1b2376afdc23342c81a07dc"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/index_dark_backup.html",
+      "size_bytes": 33444,
+      "sha256": "9ca42d41ec8082dc08256082e0e5c0b444c63ce0af037a21617bab17847b19df"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/index_v1_backup.html",
+      "size_bytes": 27710,
+      "sha256": "4339a751caeaf0ed162e48b59f52f132d5baec11378bea14df73ddb4ff321e31"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/public/assets/logo.png",
+      "size_bytes": 43441,
+      "sha256": "43c7c185a9f4c0faa6e082a0b4a7110d720f80842fed049b1fd95fc0cecadc24"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/public/index.html",
+      "size_bytes": 40657,
+      "sha256": "79211dcc6094481f22eeee2c41d615fafa330baed9904bb0f1daa9db3c609560"
+    },
+    {
+      "path": "dashboard/fgv-dashboard/server.js",
+      "size_bytes": 11307,
+      "sha256": "290f4c18ad5ce5f9e34735c19470650e3f43412a07c0ae02b450f0b37e233192"
+    },
+    {
+      "path": "dashboard/flood-dashboard-server/package.json",
+      "size_bytes": 317,
+      "sha256": "fe68f5ad00ae00a541dd28e60a8441ce99a4eec2a3f744f5a326b3439dee0f55"
+    },
+    {
+      "path": "dashboard/flood-dashboard-server/public/index.html",
+      "size_bytes": 18485,
+      "sha256": "70e7abbd3c7c7720ebcdc8ef9b00a3c69a6a349d4079c3f7a71642b6ebd76f34"
+    },
+    {
+      "path": "dashboard/flood-dashboard-server/README.md",
+      "size_bytes": 2851,
+      "sha256": "9379208f39a56a9bcc461fc1bc4a1328914ebc79c670390c1376fb4fb22a334d"
+    },
+    {
+      "path": "dashboard/flood-dashboard-server/server.js",
+      "size_bytes": 3718,
+      "sha256": "eb9ae9d556975c6f00c7b7c87637b744d405085cb5bd7816c652b4f4d563c9a4"
+    },
+    {
+      "path": "docs/ARSITEKTUR_DAN_PROTOKOL.md",
+      "size_bytes": 10033,
+      "sha256": "3fae8c63364000cec9ba0415917449989b30a2245d70954a8f86b845c3ac660d"
+    },
+    {
+      "path": "docs/BOM_PENGADAAN.md",
+      "size_bytes": 8122,
+      "sha256": "25ee1d120a8e93ae48d243d3d3a0065132fd464c5920b86acc74038cd38044a5"
+    },
+    {
+      "path": "docs/DESAIN_TESTBED.md",
+      "size_bytes": 10420,
+      "sha256": "9d136fad74fe27d17f46a2c5c49e61f31ba861706e697f5e783ca8d8ef43a12b"
+    },
+    {
+      "path": "docs/KALIBRASI_BMKG.md",
+      "size_bytes": 6748,
+      "sha256": "fe99d910ad35f6fd2d56ed1337159e0f008c3176261079cd2fea4109903c39b1"
+    },
+    {
+      "path": "docs/KALIBRASI_MANNING.md",
+      "size_bytes": 3124,
+      "sha256": "d8a3a6d17ee425a73a78d9b455073ac578eeccac7f5eab8c854399395b9103e0"
+    },
+    {
+      "path": "docs/LISTING_MEDIAN.md",
+      "size_bytes": 5992,
+      "sha256": "b3c1ce26ed18b99d9825e11e3d4dbe44f59c7433feb727a2f73766dce36d2649"
+    },
+    {
+      "path": "docs/PLAN_ROADMAP.md",
+      "size_bytes": 7145,
+      "sha256": "26ee020e3d4a3da5fb0dc8aa31d27476d7c70277109e67efe41b172c5c9a42d6"
+    },
+    {
+      "path": "docs/README.md",
+      "size_bytes": 3006,
+      "sha256": "55157d2d16da275dde32b53cae88d9937a1b3cd119e3fbe90c7b8bd9da6dc249"
+    },
+    {
+      "path": "firmware/flow_manning.h",
+      "size_bytes": 2652,
+      "sha256": "d47c2703914fb9404f15ad75bc34af6b641ff90e42667e028edbc5c519ff5223"
+    },
+    {
+      "path": "firmware/fuzzy_layer1.h",
+      "size_bytes": 5255,
+      "sha256": "cbce37e5b7c296e06fc742fcf67f794d210c747b975da4c10c181551f102d748"
+    },
+    {
+      "path": "firmware/gateway_fgv_v2/gateway_fgv_v2.ino",
+      "size_bytes": 7653,
+      "sha256": "84a41191f6cc3583cf832458c63f365a7f424b76bd571424596d5e66f9f2e66a"
+    },
+    {
+      "path": "firmware/gateway_fgv_v3/fuzzy_layer1.h",
+      "size_bytes": 5255,
+      "sha256": "cbce37e5b7c296e06fc742fcf67f794d210c747b975da4c10c181551f102d748"
+    },
+    {
+      "path": "firmware/gateway_fgv_v3/gateway_fgv_v3.ino",
+      "size_bytes": 28192,
+      "sha256": "a2255584d54cf2e55c93cb431d3dc7a3180b1c6351a48ac6e79e68e16448477a"
+    },
+    {
+      "path": "firmware/gateway_fgv_v3/pattern_layer2.h",
+      "size_bytes": 3078,
+      "sha256": "ae08a1b4aa7f0b52397f17054d94c44e2f15490eaea32ecc4fb62fb8500b2877"
+    },
+    {
+      "path": "firmware/gateway_fgv_v4/CATATAN_v4.md",
+      "size_bytes": 2442,
+      "sha256": "9dad79b011167956f3619fc35e07b9cd24503389a37487b81ea65d7eb83c462c"
+    },
+    {
+      "path": "firmware/gateway_fgv_v4/fuzzy_layer1.h",
+      "size_bytes": 5255,
+      "sha256": "cbce37e5b7c296e06fc742fcf67f794d210c747b975da4c10c181551f102d748"
+    },
+    {
+      "path": "firmware/gateway_fgv_v4/gateway_fgv_v4.ino",
+      "size_bytes": 51422,
+      "sha256": "5d00a163bf90a4a0752c8bfd74bafe0afeae901ee11e4ac67e0f7f048037153a"
+    },
+    {
+      "path": "firmware/gateway_fgv_v4/pattern_layer2.h",
+      "size_bytes": 3078,
+      "sha256": "ae08a1b4aa7f0b52397f17054d94c44e2f15490eaea32ecc4fb62fb8500b2877"
+    },
+    {
+      "path": "firmware/node_fgv_v2/flow_manning.h",
+      "size_bytes": 2394,
+      "sha256": "c5cc96594b3f6cfd1a88b69a9125e89fd8d373a79d4e866f0f38af5caf2dc20a"
+    },
+    {
+      "path": "firmware/node_fgv_v2/node_fgv_v2.ino",
+      "size_bytes": 12124,
+      "sha256": "4d4beca98f99ce826763353afc7ae80844379a03dc1ac79cb26d5459c862df26"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n1/flow_manning.h",
+      "size_bytes": 2394,
+      "sha256": "c5cc96594b3f6cfd1a88b69a9125e89fd8d373a79d4e866f0f38af5caf2dc20a"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n1/node_fgv_v2_n1.ino",
+      "size_bytes": 12395,
+      "sha256": "f44b502e1c88c159c430497f3d49d857a5c2e3d1304323e6768673c3b21f8440"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n2/flow_manning.h",
+      "size_bytes": 2394,
+      "sha256": "c5cc96594b3f6cfd1a88b69a9125e89fd8d373a79d4e866f0f38af5caf2dc20a"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n2/node_fgv_v2_n2.ino",
+      "size_bytes": 12395,
+      "sha256": "4f3de2d241f0d38f41812ac952d5e6faa2ccb1596882fd05d4fdca1d7b622145"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n3/flow_manning.h",
+      "size_bytes": 2394,
+      "sha256": "c5cc96594b3f6cfd1a88b69a9125e89fd8d373a79d4e866f0f38af5caf2dc20a"
+    },
+    {
+      "path": "firmware/node_fgv_v2_n3/node_fgv_v2_n3.ino",
+      "size_bytes": 12395,
+      "sha256": "20cc957ca031771610312830fef765cda93e72624f56a0996c619f2f2def7ee3"
+    },
+    {
+      "path": "firmware/pattern_layer2.h",
+      "size_bytes": 3078,
+      "sha256": "ae08a1b4aa7f0b52397f17054d94c44e2f15490eaea32ecc4fb62fb8500b2877"
+    },
+    {
+      "path": "hardware_poc/poc1_sensor/HASIL_POC1.md",
+      "size_bytes": 2656,
+      "sha256": "632bc940f22c8e3b264bd89cef0f3347476991ad8f907f3afbc8a17bdc724360"
+    },
+    {
+      "path": "hardware_poc/poc1_sensor/poc1_sensor.ino",
+      "size_bytes": 5510,
+      "sha256": "c0891be75903ce42844d57bdfe87688c64244b6054b691fbbf2f675e94bc5ea2"
+    },
+    {
+      "path": "hardware_poc/poc1_sensor/WIRING.md",
+      "size_bytes": 2466,
+      "sha256": "71d62ace043ee3e86ac353e687c5bff3caf9b67f64f6cf3ec6f046c5a5a9f46a"
+    },
+    {
+      "path": "hardware_poc/poc2_radio/HASIL_POC2.md",
+      "size_bytes": 2015,
+      "sha256": "4fe3cc2b88c45945df9b30ba3462427653ba063566ccf74b447c50a8773632eb"
+    },
+    {
+      "path": "hardware_poc/poc2_radio/WIRING.md",
+      "size_bytes": 2289,
+      "sha256": "f6012b7710c88dd7e6ab2b05b7ba4c0b66fbb497ceee53dc9a384d2180883929"
+    },
+    {
+      "path": "hardware_poc/poc3_e2e/HASIL_POC3.md",
+      "size_bytes": 1802,
+      "sha256": "87a2399dce545924e5f72026581a6e12f6c017ea01411b6f57e2d4ec642a5473"
+    },
+    {
+      "path": "hardware_poc/poc3_e2e/poc3_gateway/poc3_gateway.ino",
+      "size_bytes": 7755,
+      "sha256": "eef9a2c9bed96f33cf90f218676dfacca659965bcf48ab17c2bbdf6c326e9f27"
+    },
+    {
+      "path": "hardware_poc/poc3_e2e/poc3_node/poc3_node.ino",
+      "size_bytes": 5994,
+      "sha256": "2bb33d88bcdcb0a5f0ecbc9e1ac76dadbffddbc58dc500ec007a7867f717c00c"
+    },
+    {
+      "path": "hardware_poc/poc3_e2e/WIRING.md",
+      "size_bytes": 2170,
+      "sha256": "60e0aa16057acbc318f83725be4165653c0f909cdd1618b586dfb80d44d58d5e"
+    },
+    {
+      "path": "hardware_poc/poc4_doppler/analyze_doppler.py",
+      "size_bytes": 2446,
+      "sha256": "14112a67f90cd89343aa569a7bcbd3c79d8f6b9d3bacc358d4062327d0569422"
+    },
+    {
+      "path": "hardware_poc/poc4_doppler/poc4_doppler.ino",
+      "size_bytes": 3980,
+      "sha256": "8006a9eca96a39e5cd400852c99d1de855b5775e2d539da5528bb38da58bc6e9"
+    },
+    {
+      "path": "hardware_poc/poc4_doppler/WIRING.md",
+      "size_bytes": 4370,
+      "sha256": "c4306b2c840e8471d1fd6682c546221de84554a59f56306b55397c65fc9356c6"
+    },
+    {
+      "path": "hardware_poc/poc5_manning/flow_manning.h",
+      "size_bytes": 1751,
+      "sha256": "e4b09f3b871673251d5308dcfe40d20860c11dc3954b74bb10b6d41bc4388e3c"
+    },
+    {
+      "path": "hardware_poc/poc5_manning/poc5_gateway/poc5_gateway.ino",
+      "size_bytes": 6668,
+      "sha256": "b20dbb1a87b003b8fa0c793ffb684a4d6930636a2b533ad8fdc325b395dff091"
+    },
+    {
+      "path": "hardware_poc/poc5_manning/poc5_manning.ino",
+      "size_bytes": 7134,
+      "sha256": "ded3e2c6f6c4c6bda9f714474c94895e1ec499b244849d1c2d158fb4e5b510a1"
+    },
+    {
+      "path": "LICENSE",
+      "size_bytes": 1107,
+      "sha256": "a5d9a2d058109de51864cbb8e82e6370b7b41c306d3e8ae169f0dd3e118d96d4"
+    },
+    {
+      "path": "MANIFEST.md",
+      "size_bytes": 1570,
+      "sha256": "0313bff99c91d571045d43c6b86fc572cfd79f2e4ec9737b7208331d19e1b51b"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 4211,
+      "sha256": "960520da8d069df3a912236337d6ff87960b8a31b3a0a73670fc17d0b72ca9a0"
+    },
+    {
+      "path": "sim/fgv_engine.py",
+      "size_bytes": 14629,
+      "sha256": "cff39c60e304a2319662817ceeb55d150af6e0c4c7033405a22d7cc647bbd50b"
+    },
+    {
+      "path": "sim/HASIL_VALIDASI.md",
+      "size_bytes": 17374,
+      "sha256": "f6ed03501d003f07e95bebd023df535a716b6bfa07d06cc15dc747826d4cc449"
+    },
+    {
+      "path": "sim/node_modular.html",
+      "size_bytes": 19593,
+      "sha256": "26f81c4f99e4b6a9351ed8f024a7840f7ee10fa796896f4e1e51b601726ad89a"
+    },
+    {
+      "path": "sim/run_validasi.py",
+      "size_bytes": 17258,
+      "sha256": "4f08c49554def9b73721f5bbd57acdab6f0110ae23a1e091e5638231dc35d40f"
+    },
+    {
+      "path": "sim/simulasi_multinode.html",
+      "size_bytes": 36420,
+      "sha256": "296fdb93034f9b05ef3d9fab6f7abc5a3c7361845fa9ddba9b8baeee3852c510"
+    },
+    {
+      "path": "sim/simulasi_testbed.html",
+      "size_bytes": 30517,
+      "sha256": "6b84dc143076ef2caa4dd4313b589ebcb250c39f12214e1bb5bd9a6c97f5c5c7"
+    },
+    {
+      "path": "sim/testbed_kaskade.html",
+      "size_bytes": 22157,
+      "sha256": "e0f2240e4144903a3214d396c67d7f9de3bc29c2e217b73e3b65ccf60295f649"
+    }
+  ]
+}

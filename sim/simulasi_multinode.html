@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FGV Multi-Node Simulator — Layer 2 Pattern Classifier</title>
+<style>
+  :root{
+    --ink:#1c2027; --muted:#5b6472; --line:#d9dde3; --bg:#f4f4f1; --card:#ffffff;
+    --water:#2e86c1; --ok:#1e8e4e; --warnb:#c47f1a; --siaga:#c0392b; --danger:#8e1b1b;
+    --kir:#c47f1a; --bw:#7d3c98; --lok:#b7950b; --ser:#c0392b; --cam:#5d6d7e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI","Trebuchet MS",sans-serif;font-size:14px}
+  .mono{font-family:Consolas,"Cascadia Mono",monospace}
+  #app{max-width:1240px;margin:0 auto;padding:14px 18px 22px}
+
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:12px}
+  header h1{font-size:19px;margin:0}
+  header h1 span{color:var(--muted);font-weight:400;font-size:13.5px}
+  header nav{margin-left:auto;display:flex;gap:10px;align-items:center}
+  header nav a{color:var(--muted);text-decoration:none;font-size:12px;
+    border:1px solid var(--line);padding:3px 10px;border-radius:4px;background:var(--card)}
+  header nav a:hover{border-color:var(--ink);color:var(--ink)}
+  #engineBadge{font-size:11.5px;padding:3px 10px;border-radius:3px;
+    border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  #engineBadge.ok{border-color:var(--ok);color:var(--ok);font-weight:600}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:14px}
+  @media(max-width:940px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+  #stage svg{width:100%;height:auto;display:block}
+  .cap{font-size:10.5px;fill:var(--muted);font-family:Consolas,monospace}
+  .capW{font-size:10px;fill:#fff;font-family:Consolas,monospace}
+
+  /* kelas pola */
+  #classChip{display:inline-block;padding:6px 16px;border-radius:4px;color:#fff;
+    font-weight:700;font-size:18px;letter-spacing:1px}
+  .k-AMAN{background:var(--ok)} .k-KIRIMAN_HULU{background:var(--kir)}
+  .k-BACKWATER{background:var(--bw)} .k-LOKAL{background:var(--lok);color:#fff}
+  .k-SERENTAK{background:var(--ser)} .k-CAMPURAN{background:var(--cam)}
+  #aksiTxt{font-size:12.5px;margin-top:6px;line-height:1.45}
+  #konfTxt{font-size:11.5px;margin-top:4px;color:var(--bw);min-height:15px;font-style:italic}
+
+  /* node cards */
+  .nodes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+  .node{border:1px solid var(--line);border-radius:5px;padding:6px 8px;position:relative}
+  .node h4{margin:0 0 4px;font-size:12px;letter-spacing:.6px}
+  .node .st{display:inline-block;font-size:10px;font-weight:700;color:#fff;
+    padding:2px 7px;border-radius:3px;letter-spacing:.5px}
+  .node table{width:100%;border-collapse:collapse;margin-top:5px}
+  .node td{font-size:11px;padding:1px 0;font-family:Consolas,monospace}
+  .node td:last-child{text-align:right;font-weight:600}
+  .node .lvl1{position:absolute;top:6px;right:8px;font-size:9.5px;color:var(--muted)}
+
+  .sec-title{font-size:11px;letter-spacing:1.2px;color:var(--muted);margin:14px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  .ctl{margin:7px 0}
+  .ctl label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .ctl label output{color:var(--ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--ink);height:22px}
+  .rainRow{display:flex;gap:8px;align-items:center}
+  .rainRow b{font-size:10.5px;width:46px;color:var(--muted);font-weight:600}
+  .presets{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .presets button{font:inherit;font-size:11.5px;padding:4px 9px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+  .presets button:hover{border-color:var(--ink)}
+  .presets button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  #presetDesc{font-size:11px;color:var(--muted);margin-top:6px;min-height:28px;line-height:1.4}
+
+  /* grid 27 */
+  #grid27{display:flex;gap:10px;justify-content:space-between}
+  .g27{flex:1}
+  .g27 .gt{font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:2px;letter-spacing:.5px}
+  .g27 table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .g27 td{border:1px solid var(--line);text-align:center;font-size:9px;font-weight:700;
+    padding:3px 0;font-family:Consolas,monospace;cursor:default}
+  .g27 td.cur{outline:2.5px solid var(--ink);outline-offset:-1px}
+  .g27 .ax{font-size:8.5px;color:var(--muted);text-align:center;font-family:Consolas,monospace}
+  #legend{font-size:9.5px;color:var(--muted);margin-top:5px;line-height:1.6}
+  #legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 3px -1px 8px}
+
+  #spark{width:100%;height:64px;border:1px solid var(--line);border-radius:4px;background:#fbfbfa}
+  footer{margin-top:14px;font-size:10.5px;color:var(--muted);line-height:1.5}
+  @keyframes flowdash{to{stroke-dashoffset:-48}}
+  .flowanim{animation:flowdash 1.1s linear infinite}
+  @media(prefers-reduced-motion:reduce){.flowanim{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>FGV Multi-Node <span>· Layer 2 Spatial Pattern Classifier — novelty FGV</span></h1>
+    <nav>
+      <a href="simulasi_testbed.html">← Hal. 1: Testbed</a>
+      <div id="engineBadge" class="mono">engine check…</div>
+    </nav>
+  </header>
+
+  <div class="grid">
+    <!-- ═══════════ STAGE: SUNGAI 3 SIMPUL ═══════════ -->
+    <div class="card" id="stage">
+      <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" aria-label="Sungai 3 simpul FGV">
+        <!-- langit & awan -->
+        <g id="cloudH" opacity="0.15">
+          <ellipse cx="180" cy="52" rx="80" ry="22" fill="#b9c2ca"/>
+          <ellipse cx="240" cy="40" rx="55" ry="18" fill="#cfd6dc"/>
+        </g>
+        <g id="cloudT" opacity="0.15">
+          <ellipse cx="490" cy="52" rx="80" ry="22" fill="#b9c2ca"/>
+          <ellipse cx="550" cy="40" rx="55" ry="18" fill="#cfd6dc"/>
+        </g>
+        <g id="cloudD" opacity="0.15">
+          <ellipse cx="790" cy="52" rx="80" ry="22" fill="#b9c2ca"/>
+          <ellipse cx="850" cy="40" rx="55" ry="18" fill="#cfd6dc"/>
+        </g>
+        <g id="rainH"></g><g id="rainT"></g><g id="rainD"></g>
+
+        <!-- pompa + riser (kiri, masuk HULU) -->
+        <rect x="18" y="300" width="46" height="46" rx="6" fill="#f0b90b" stroke="#b8860b"/>
+        <text class="cap" x="14" y="294">POMPA</text>
+        <rect x="60" y="262" width="12" height="60" fill="#e67e22"/>
+        <circle cx="66" cy="286" r="11" fill="#f5f5f2" stroke="#9aa4ad" stroke-width="1.5"/>
+        <rect id="valveHandle" x="62" y="264" width="8" height="26" rx="3" fill="#c0392b"/>
+
+        <!-- ══ ZONE HULU ══ -->
+        <g>
+          <rect x="82" y="180" width="10" height="90" fill="#8a929b"/>   <!-- dinding kiri -->
+          <rect x="318" y="180" width="10" height="90" fill="#8a929b"/>  <!-- dinding kanan -->
+          <rect x="82" y="268" width="246" height="12" fill="#9aa4ad"/>  <!-- dasar -->
+          <rect id="wH" x="86" y="262" width="238" height="6" fill="#5dade2" opacity=".85"/>
+          <text class="cap" x="86" y="300">HULU</text>
+          <text class="cap" x="348" y="262" transform="rotate(35 348 262)">↓</text>
+        </g>
+        <!-- weir HULU→TENGAH -->
+        <path d="M328 272 C 344 278, 350 284, 356 292" stroke="#5dade2" stroke-width="7"
+              fill="none" stroke-linecap="round" opacity=".9"/>
+        <path class="flowanim" d="M328 272 C 344 278, 350 284, 356 292" stroke="#fff"
+              stroke-width="2" fill="none" stroke-dasharray="5 9" opacity=".8"/>
+
+        <!-- ══ ZONE TENGAH ══ -->
+        <g>
+          <rect x="352" y="220" width="10" height="90" fill="#8a929b"/>
+          <rect x="588" y="220" width="10" height="90" fill="#8a929b"/>
+          <rect x="352" y="308" width="246" height="12" fill="#9aa4ad"/>
+          <rect id="wT" x="356" y="302" width="238" height="6" fill="#5dade2" opacity=".85"/>
+          <text class="cap" x="356" y="340">TENGAH</text>
+        </g>
+        <path d="M598 312 C 614 318, 620 324, 626 332" stroke="#5dade2" stroke-width="7"
+              fill="none" stroke-linecap="round" opacity=".9"/>
+        <path class="flowanim" d="M598 312 C 614 318, 620 324, 626 332" stroke="#fff"
+              stroke-width="2" fill="none" stroke-dasharray="5 9" opacity=".8"/>
+
+        <!-- ══ ZONE HILIR ══ -->
+        <g>
+          <rect x="622" y="260" width="10" height="90" fill="#8a929b"/>
+          <rect x="858" y="260" width="10" height="90" fill="#8a929b"/>
+          <rect x="622" y="348" width="246" height="12" fill="#9aa4ad"/>
+          <rect id="wD" x="626" y="342" width="238" height="6" fill="#5dade2" opacity=".85"/>
+          <text class="cap" x="626" y="380">HILIR</text>
+        </g>
+
+        <!-- gate hilir (bendungan/sumbatan) -->
+        <g>
+          <rect x="862" y="274" width="26" height="86" fill="#2b2f36" opacity=".9"/>
+          <rect id="gateBar" x="864" y="352" width="22" height="4" fill="#c0392b"/>
+          <text class="cap" x="846" y="372">GATE</text>
+          <!-- limpasan hilir -->
+          <path id="ovD" d="M888 352 C 902 356, 906 362, 910 370" stroke="#5dade2"
+                stroke-width="6" fill="none" opacity="0"/>
+          <text id="ovTxt" class="cap" x="906" y="336" fill="#c0392b" opacity="0">LIMPAS</text>
+        </g>
+
+        <!-- desa di hilir -->
+        <g id="village">
+          <rect x="930" y="330" width="34" height="26" fill="#e8e2d4" stroke="#8a8070" stroke-width="1.5"/>
+          <path d="M926 330 L947 316 L968 330 Z" fill="#b0563a"/>
+          <rect x="930" y="392" width="28" height="20" fill="#e8e2d4" stroke="#8a8070" stroke-width="1.5"/>
+          <path d="M927 392 L944 380 L961 392 Z" fill="#b0563a"/>
+          <text class="cap" x="928" y="428">DESA</text>
+          <text id="evacTxt" class="cap" x="918" y="304" fill="#c0392b" opacity="0" font-weight="bold">⚠ EVAKUASI</text>
+        </g>
+
+        <!-- ══ NODE POSTS ══ -->
+        <!-- HULU post -->
+        <g>
+          <rect x="146" y="96" width="8" height="84" fill="#2b2f36"/>
+          <rect x="128" y="64" width="46" height="30" rx="4" fill="#23272e"/>
+          <circle id="lampH" cx="151" cy="79" r="5" fill="#1e8e4e"/>
+          <text class="capW" x="156" y="83">H</text>
+          <line id="beamH" x1="151" y1="96" x2="151" y2="262" stroke="#c0392b"
+                stroke-width="1.4" stroke-dasharray="4 5" opacity=".7"/>
+          <text id="beamTxtH" class="cap" x="158" y="180" fill="#c0392b"></text>
+          <rect id="gaugeH" x="160" y="96" width="6" height="2" fill="#1e8e4e"/>
+          <text class="cap" x="124" y="56">NODE HULU</text>
+        </g>
+        <!-- TENGAH post -->
+        <g>
+          <rect x="456" y="136" width="8" height="84" fill="#2b2f36"/>
+          <rect x="438" y="104" width="46" height="30" rx="4" fill="#23272e"/>
+          <circle id="lampT" cx="461" cy="119" r="5" fill="#1e8e4e"/>
+          <text class="capW" x="466" y="123">T</text>
+          <line id="beamT" x1="461" y1="136" x2="461" y2="302" stroke="#c0392b"
+                stroke-width="1.4" stroke-dasharray="4 5" opacity=".7"/>
+          <text id="beamTxtT" class="cap" x="468" y="220" fill="#c0392b"></text>
+          <rect id="gaugeT" x="470" y="136" width="6" height="2" fill="#1e8e4e"/>
+          <text class="cap" x="434" y="96">NODE TENGAH</text>
+        </g>
+        <!-- HILIR post -->
+        <g>
+          <rect x="726" y="176" width="8" height="84" fill="#2b2f36"/>
+          <rect x="708" y="144" width="46" height="30" rx="4" fill="#23272e"/>
+          <circle id="lampD" cx="731" cy="159" r="5" fill="#1e8e4e"/>
+          <text class="capW" x="736" y="163">D</text>
+          <line id="beamD" x1="731" y1="176" x2="731" y2="342" stroke="#c0392b"
+                stroke-width="1.4" stroke-dasharray="4 5" opacity=".7"/>
+          <text id="beamTxtD" class="cap" x="738" y="260" fill="#c0392b"></text>
+          <rect id="gaugeD" x="740" y="176" width="6" height="2" fill="#1e8e4e"/>
+          <text class="cap" x="704" y="136">NODE HILIR</text>
+        </g>
+
+        <text class="cap" x="24" y="512">Arus: pompa → HULU → TENGAH → HILIR → gate → desa · lag transport antar simpul 14 dtk (sim)</text>
+      </svg>
+    </div>
+
+    <!-- ═══════════ PANEL GATEWAY ═══════════ -->
+    <div class="card">
+      <div class="sec-title" style="margin-top:2px">GATEWAY — KLASIFIKASI POLA (LAYER 2)</div>
+      <div>
+        <span id="classChip" class="k-AMAN">AMAN</span>
+        <span class="mono" id="patternTri" style="margin-left:10px;font-size:12px;color:var(--muted)">(H,T,D)=(0,0,0)</span>
+      </div>
+      <div id="aksiTxt"><b>Tindakan:</b> Monitoring rutin</div>
+      <div id="konfTxt"></div>
+
+      <div class="nodes">
+        <div class="node"><h4>HULU</h4><span class="st" id="stH">AMAN</span>
+          <span class="lvl1" id="l1H">L1: Rendah</span>
+          <table><tr><td>level</td><td id="lvH">45 %</td></tr>
+          <tr><td>I_Q</td><td id="iqH">1.00</td></tr>
+          <tr><td>risk</td><td id="rkH">15.0</td></tr></table></div>
+        <div class="node"><h4>TENGAH</h4><span class="st" id="stT">AMAN</span>
+          <span class="lvl1" id="l1T">L1: Rendah</span>
+          <table><tr><td>level</td><td id="lvT">45 %</td></tr>
+          <tr><td>I_Q</td><td id="iqT">1.00</td></tr>
+          <tr><td>risk</td><td id="rkT">15.0</td></tr></table></div>
+        <div class="node"><h4>HILIR</h4><span class="st" id="stD">AMAN</span>
+          <span class="lvl1" id="l1D">L1: Rendah</span>
+          <table><tr><td>level</td><td id="lvD">45 %</td></tr>
+          <tr><td>I_Q</td><td id="iqD">1.00</td></tr>
+          <tr><td>risk</td><td id="rkD">15.0</td></tr></table></div>
+      </div>
+
+      <div class="sec-title">RIWAYAT LEVEL 3 SIMPUL (%)</div>
+      <canvas id="spark" width="420" height="64"></canvas>
+
+      <div class="sec-title">TABEL 27 KOMBINASI (posisi saat ini = kotak tepi hitam)</div>
+      <div id="grid27"></div>
+      <div id="legend"><b>Kode:</b><i style="background:var(--ok)"></i>AMN=AMAN
+        <i style="background:var(--kir)"></i>KIR=KIRIMAN_HULU<i style="background:var(--bw)"></i>BW=BACKWATER
+        <i style="background:var(--lok)"></i>LOK=LOKAL<i style="background:var(--ser)"></i>SER=SERENTAK
+        <i style="background:var(--cam)"></i>CAM=CAMPURAN</div>
+
+      <div class="sec-title">KONTROL HULU (sumber air) & HILIR (gate)</div>
+      <div class="ctl">
+        <label>Ball valve pompa (debit masuk hulu) <output id="oValve" class="mono">59 %</output></label>
+        <input type="range" id="iValve" min="0" max="100" value="59" step="1">
+      </div>
+      <div class="ctl">
+        <label>Gate outlet hilir (sumbatan) <output id="oGate" class="mono">100 %</output></label>
+        <input type="range" id="iGate" min="0" max="100" value="100" step="1">
+      </div>
+
+      <div class="sec-title">INJEKSI PRAKIRAAN HUJAN tp PER WILAYAH (mm/3 jam)</div>
+      <div class="ctl rainRow"><b>HULU</b>
+        <input type="range" id="iRainH" min="0" max="10" value="0.2" step="0.1">
+        <output id="oRainH" class="mono">0.2</output></div>
+      <div class="ctl rainRow"><b>TENGAH</b>
+        <input type="range" id="iRainT" min="0" max="10" value="0.2" step="0.1">
+        <output id="oRainT" class="mono">0.2</output></div>
+      <div class="ctl rainRow"><b>HILIR</b>
+        <input type="range" id="iRainD" min="0" max="10" value="0.2" step="0.1">
+        <output id="oRainD" class="mono">0.2</output></div>
+
+      <div class="sec-title">SEKENARIO UJI (S1–S6, HASIL VALIDASI BAGIAN 4)</div>
+      <div class="presets" id="presets">
+        <button data-s="S1">S1 Baseline</button><button data-s="S2">S2 Prakiraan</button>
+        <button data-s="S3">S3 Kiriman</button><button data-s="S4">S4 Sumbatan</button>
+        <button data-s="S5">S5 Lokal</button><button data-s="S6">S6 Kritis</button>
+      </div>
+      <div id="presetDesc">Pilih skenario…</div>
+
+      <div class="sec-title">WAKTU SIMULASI</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <button id="btnPause" style="font:inherit;padding:4px 12px;border:1px solid var(--line);background:var(--bg);border-radius:4px;cursor:pointer">⏸ Jeda</button>
+        <select id="iSpeed" class="mono" style="font:inherit;padding:4px 6px;border:1px solid var(--line);background:var(--bg);border-radius:4px">
+          <option value="0.5">0.5×</option><option value="1" selected>1×</option>
+          <option value="2">2×</option><option value="5">5×</option>
+        </select>
+        <span class="mono" id="simClock" style="color:var(--muted);font-size:12px">t = 0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Ket. kejujuran:</b> Layer 1 (fuzzy 27 rule + safety floor) & Layer 2 (pattern classifier 27
+    kombinasi + konfirmasi backwater) adalah port 1:1 dari <span class="mono">sim/fgv_engine.py v2</span>,
+    dibuktikan self-test <span class="mono" id="footVec">…</span> vektor. Dinamika air 3 simpul
+    (lag transport 14 dtk, runoff hujan) adalah model first-order untuk visualisasi konsep —
+    bukan hidrolika numerik. Klaim yang sah: <i>disimulasikan</i>. Dinamika tiap skenario telah
+    diuji di Python sebelum halaman ini ditulis.
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   FGV ENGINE v2 — PORT JS 1:1 DARI sim/fgv_engine.py (identik hal. 1)
+   ═══════════════════════════════════════════════════════════════ */
+const clamp01 = x => x < 0 ? 0 : (x > 1 ? 1 : x);
+function trapLeft(x, b, c){ if(x <= b) return 1; if(x >= c) return 0; return (c - x) / (c - b); }
+function trapRight(x, a, b){ if(x <= a) return 0; if(x >= b) return 1; return (x - a) / (b - a); }
+function triangle(x, a, b, c){
+  if(x <= a || x >= c) return 0; if(x === b) return 1;
+  return x < b ? (x - a)/(b - a) : (c - x)/(c - b);
+}
+const MF_LEVEL = { rendah:[trapLeft,15,35], sedang:[triangle,20,45,70], tinggi:[trapRight,50,75] };
+const MF_FLOW  = { lambat:[trapLeft,0.8,1.3], sedang:[triangle,1.0,1.6,2.6], deras:[trapRight,2.0,3.0] };
+const MF_RAIN  = { ringan:[trapLeft,1.0,2.5], sedang:[triangle,2.0,4.0,7.0], lebat:[trapRight,5.5,10.0] };
+const ORDER = { level:["rendah","sedang","tinggi"], flow:["lambat","sedang","deras"], rain:["ringan","sedang","lebat"] };
+function fuzzify(varName, x){
+  const table = {level:MF_LEVEL, flow:MF_FLOW, rain:MF_RAIN}[varName];
+  return ORDER[varName].map(n => clamp01(table[n][0](x, ...table[n].slice(1))));
+}
+const RULE_OUTPUT = [
+  [[5,20,50],[10,30,60],[20,40,70]],
+  [[15,40,65],[35,55,75],[50,70,85]],
+  [[40,65,85],[60,80,95],[80,95,100]],
+];
+function safetyFloor(levelPct, flowIdx){
+  let f = 0;
+  if(levelPct >= 90) f = Math.max(f, 90);
+  if(levelPct >= 75) f = Math.max(f, 75);
+  if(levelPct >= 60 && flowIdx >= 2.5) f = Math.max(f, 70);
+  return f;
+}
+function riskLayer1(levelPct, flowIdx, rainMm3h){
+  const muL = fuzzify("level", levelPct), muF = fuzzify("flow", flowIdx), muR = fuzzify("rain", rainMm3h);
+  let num = 0, den = 0, fired = 0;
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++) for(let k=0;k<3;k++){
+    const w = Math.min(muL[i], muF[j], muR[k]);
+    if(w > 0){ num += w * RULE_OUTPUT[i][j][k]; den += w; fired++; }
+  }
+  let risk = den ? num/den : 0;
+  const floor = safetyFloor(levelPct, flowIdx);
+  if(floor > risk) risk = floor;
+  return { risk, fired };
+}
+function status4(risk){
+  return risk >= 75 ? "BAHAYA" : risk >= 50 ? "SIAGA" : risk >= 25 ? "WASPADA" : "AMAN";
+}
+function levelL1(risk){ return risk >= 60 ? 2 : risk >= 25 ? 1 : 0; }
+
+function classifyPattern(h, t, d, iqHilir, iqBase, lvHilir){
+  const mx = Math.max(h, t, d);
+  if(mx === 0) return ["AMAN", null];
+  if(h > t && t > d) return ["KIRIMAN_HULU", null];
+  if(d > t && t > h) return ["BACKWATER", konfirmasiBW(iqHilir, iqBase, lvHilir)];
+  if(d > h && d >= t) return ["BACKWATER", konfirmasiBW(iqHilir, iqBase, lvHilir)];
+  if(h > d && h >= t) return ["KIRIMAN_HULU", null];
+  if(t > h && t > d) return ["LOKAL", null];
+  if(h === t && t === d) return ["SERENTAK", null];
+  if([h>=1, t>=1, d>=1].filter(Boolean).length === 1) return ["LOKAL", null];
+  return ["CAMPURAN", null];
+}
+function konfirmasiBW(iqHilir, iqBase, lvHilir){
+  if(iqHilir === null || iqBase === null || iqBase === 0) return null;
+  const rasio = iqHilir / iqBase;
+  const lv = lvHilir !== null ? Math.round(lvHilir) + "%" : "n/a";
+  if(rasio < 0.85)
+    return "indikasi sumbatan KUAT: muka air hilir " + lv +
+           " sementara debit turun ke " + rasio.toFixed(2) + "x baseline";
+  if(rasio <= 1.05)
+    return "debit stagnan (" + rasio.toFixed(2) + "x baseline) - konsisten dengan pembendungan";
+  return "debit justru naik (" + rasio.toFixed(2) + "x baseline) - pertimbangkan ulang penyebabnya";
+}
+function slopeLS(y, t){
+  const n = y.length; if(n < 3 || n !== t.length) return null;
+  const mx = t.reduce((a,b)=>a+b,0)/n, my = y.reduce((a,b)=>a+b,0)/n;
+  let sxx = 0, sxy = 0;
+  for(let i=0;i<n;i++){ sxx += (t[i]-mx)**2; sxy += (t[i]-mx)*(y[i]-my); }
+  return sxx === 0 ? null : sxy/sxx;
+}
+
+/* ═══════ SELF-TEST vs fgv_engine.py (vektor sama dgn hal. 1) ═══════ */
+const ENGINE_VECTORS = [
+[12.0,1.0,0.2,5.0,"AMAN",0],[20.0,1.0,0.2,5.0,"AMAN",0],[20.0,1.0,8.0,50.0,"SIAGA",1],
+[18.0,1.05,8.0,51.4286,"SIAGA",1],[78.0,2.6,6.0,96.25,"BAHAYA",2],[45.0,1.7,6.0,60.0,"SIAGA",2],
+[14.0,1.0,6.0,27.5,"WASPADA",1],[14.0,1.0,3.0,20.0,"AMAN",0],[18.0,1.05,3.0,21.4286,"AMAN",0],
+[72.0,0.55,3.0,65.0,"SIAGA",2],[11.0,1.0,2.0,5.0,"AMAN",0],[68.0,2.2,9.0,93.1579,"BAHAYA",2],
+[12.0,1.0,2.0,5.0,"AMAN",0],[88.0,2.8,10.0,100.0,"BAHAYA",2],[84.0,2.6,10.0,100.0,"BAHAYA",2],
+[80.0,2.5,10.0,99.1667,"BAHAYA",2],[100.0,0.5,0.5,90.0,"BAHAYA",2],[95.0,0.6,1.0,90.0,"BAHAYA",2],
+[80.0,0.5,0.5,75.0,"BAHAYA",2],[78.0,2.6,1.0,80.0,"BAHAYA",2],[60.0,0.5,0.5,27.5,"WASPADA",1],
+[40.0,1.0,1.0,15.0,"AMAN",0],[0.0,0.3,0.0,5.0,"AMAN",0],[30.0,1.6,4.0,45.3846,"WASPADA",1],
+[50.0,2.0,6.5,66.4286,"SIAGA",2],[10.0,3.0,10.0,70.0,"SIAGA",2]];
+const L2_VECTORS = [[0,0,0,"AMAN"],[2,1,1,"KIRIMAN_HULU"],[2,2,1,"KIRIMAN_HULU"],[1,2,2,"BACKWATER"],
+[0,2,1,"LOKAL"],[2,0,0,"KIRIMAN_HULU"],[1,1,0,"KIRIMAN_HULU"],[2,2,2,"SERENTAK"],[1,0,1,"CAMPURAN"],
+[2,1,0,"KIRIMAN_HULU"],[0,0,2,"BACKWATER"]];
+
+(function engineSelfTest(){
+  let pass = 0, fail = [];
+  for(const [lv, iq, rn, expR, expSt, expL1] of ENGINE_VECTORS){
+    const r = riskLayer1(lv, iq, rn);
+    if(Math.abs(r.risk - expR) < 0.001 && status4(r.risk) === expSt && levelL1(r.risk) === expL1) pass++;
+    else fail.push(`L1(${lv},${iq},${rn})`);
+  }
+  for(const [h,t,d,k] of L2_VECTORS){
+    if(classifyPattern(h,t,d)[0] === k) pass++; else fail.push(`L2(${h},${t},${d})`);
+  }
+  const total = ENGINE_VECTORS.length + L2_VECTORS.length;
+  const badge = document.getElementById("engineBadge");
+  badge.textContent = `ENGINE CHECK ${pass}/${total} OK — identik fgv_engine.py v2`;
+  badge.classList.toggle("ok", fail.length === 0);
+  document.getElementById("footVec").textContent = `${pass}/${total}`;
+  window.__engineOK = fail.length === 0;
+  if(fail.length) console.error("SELF-TEST GAGAL:", fail);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   MODEL FISIK 3 SIMPUL (sudah diuji di Python sebelum ditulis):
+   A=0.025 m², kout=22 (hilir ×gate), Q_ref=10, Q_max=17,
+   lag transport 14 dtk, runoff = tp×0.15 (tau 25 dtk)
+   ═══════════════════════════════════════════════════════════════ */
+const CHAN=120, A=0.025, KOUT=22, QREF=10, QMAX=17, LAG=14, ROFF=0.15, TAU=25;
+const S = {
+  valve:.59, gate:1, rain:[.2,.2,.2],
+  depth:[54,54,54], qrun:[0,0,0],
+  bufH:[], bufT:[],
+  t:0, speed:1, paused:false,
+  hist:[],          // {t, lv:[3]}
+  lastHist:0, lastGrid:0,
+};
+function step(dt){
+  S.t += dt;
+  for(let i=0;i<3;i++) S.qrun[i] += (S.rain[i]*ROFF - S.qrun[i]) * dt/TAU;
+  const delayed = buf => {
+    while(buf.length > 1 && buf[1][0] <= S.t - LAG) buf.shift();
+    for(let i = buf.length-1; i >= 0; i--) if(buf[i][0] <= S.t - LAG) return buf[i][1];
+    return buf.length ? buf[0][1] : 0;
+  };
+  const inflow = [S.valve*QMAX + S.qrun[0], delayed(S.bufH) + S.qrun[1], delayed(S.bufT) + S.qrun[2]];
+  const kout = [KOUT, KOUT, KOUT*S.gate];
+  const out = [];
+  for(let i=0;i<3;i++){
+    const qo = kout[i] * Math.min(1, S.depth[i]/CHAN);
+    out.push(Math.min(inflow[i], kout[i]*Math.min(1, S.depth[i]/CHAN)));
+    S.depth[i] = Math.max(0, Math.min(CHAN, S.depth[i] + (inflow[i]-qo)/60000/A*1000*dt));
+  }
+  S.bufH.push([S.t, out[0]]); S.bufT.push([S.t, out[1]]);
+  return out;
+}
+/* pre-warm 60 dtk baseline supaya semua simpul steady saat halaman dibuka */
+for(let i=0;i<600;i++) step(0.1);
+for(let k=0;k<30;k++) S.hist.push({t:S.t-60+k*2, lv:S.depth.map(d=>d/CHAN*100)});
+
+/* ═══════════ AKSI per kelas (dari fgv_engine.py) ═══════════ */
+const AKSI = {
+  AMAN:"Monitoring rutin",
+  KIRIMAN_HULU:"Peringatkan warga hilir, amankan barang, siapkan jalur evakuasi",
+  BACKWATER:"Kirim tim cek fisik sumbatan/bendung di hilir",
+  LOKAL:"Cek segmen terkait, siapkan pompa lokal",
+  SERENTAK:"Aktivasi posko siaga desa",
+  CAMPURAN:"Verifikasi manual lapangan sebelum mengambil keputusan",
+};
+const KELAS_DESC = {
+  AMAN:"Semua node pada level Rendah",
+  KIRIMAN_HULU:"Banjir kiriman dari hulu (gelombang bergerak ke hilir)",
+  BACKWATER:"Pembendungan / sumbatan di hilir (efek backwater)",
+  LOKAL:"Banjir lokal pada satu segmen",
+  SERENTAK:"Kenaikan merata sepanjang saluran",
+  CAMPURAN:"Pola tak dikenal — perlu verifikasi lapangan",
+};
+const PRESETS = {
+  S1:{valve:.59, gate:1, rain:[.2,.2,.2],  desc:"S1 — Baseline: valve 59%, gate normal, tp 0.2 semua → semua simpul aman, pola <b>AMAN</b>."},
+  S2:{valve:.59, gate:1, rain:[8,8,8],    desc:"S2 — Leading indicator: injeksi prakiraan tp 8 mm/3j serentak. Status naik ke SIAGA <b>sebelum air naik</b> (amati t kecil) → <b>SERENTAK</b>."},
+  S3:{valve:1,  gate:1, rain:[6,.2,.2],   desc:"S3 — Banjir kiriman: valve 100% + hujan di hulu saja. Hulu naik duluan, gelombang merambat (lag 14 dtk/simpul) → <b>KIRIMAN_HULU</b>, lalu menyusul <b>SERENTAK</b> saat gelombang tiba di hilir."},
+  S4:{valve:.59, gate:.35, rain:[.2,.2,.2], desc:"S4 — Sumbatan hilir: gate outlet 35%. Hilir penuh & melimpas sementara debit lewatnya TURUN (0.77× baseline) → <b>BACKWATER</b> + konfirmasi sumbatan kuat. Hulu-tengah tetap normal."},
+  S5:{valve:.59, gate:1, rain:[.2,9,.2],  desc:"S5 — Banjir lokal: hujan deras hanya di tengah → hanya simpul tengah naik → <b>LOKAL</b>."},
+  S6:{valve:1,  gate:1, rain:[10,10,10],  desc:"S6 — Kritis serentak: debit puncak + prakiraan hujan lebat semua wilayah → semua BAHAYA → <b>SERENTAK</b>."},
+};
+
+const $ = id => document.getElementById(id);
+const els = {
+  w:[$("wH"),$("wT"),$("wD")],
+  beam:[$("beamH"),$("beamT"),$("beamD")],
+  beamTxt:[$("beamTxtH"),$("beamTxtT"),$("beamTxtD")],
+  gauge:[$("gaugeH"),$("gaugeT"),$("gaugeD")],
+  lamp:[$("lampH"),$("lampT"),$("lampD")],
+  st:[$("stH"),$("stT"),$("stD")],
+  l1:[$("l1H"),$("l1T"),$("l1D")],
+  lv:[$("lvH"),$("lvT"),$("lvD")],
+  iq:[$("iqH"),$("iqT"),$("iqD")],
+  rk:[$("rkH"),$("rkT"),$("rkD")],
+  cloud:[$("cloudH"),$("cloudT"),$("cloudD")],
+  rainG:[$("rainH"),$("rainT"),$("rainD")],
+};
+/* geometri: dasar y & tinggi air maks 70 px per zona; posisi post per zona */
+const BEDY = [262, 302, 342], MAXH = 64, BEAMY2 = [268, 308, 348];
+const POSTBEAM = [[151,96],[461,136],[731,176]];   // x beam, y mulai beam
+const STCOL = {AMAN:"#1e8e4e", WASPADA:"#c47f1a", SIAGA:"#c0392b", BAHAYA:"#8e1b1b"};
+const L1NAME = ["Rendah","Sedang","Tinggi"];
+const CODE = {AMAN:["AMN","#1e8e4e"], KIRIMAN_HULU:["KIR","#c47f1a"], BACKWATER:["BW","#7d3c98"],
+  LOKAL:["LOK","#b7950b"], SERENTAK:["SER","#c0392b"], CAMPURAN:["CAM","#5d6d7e"]};
+const NODECOL = ["#0e7490","#2e86c1","#7d3c98"];
+
+/* ═══════════ grid 27 (dibangun dari classifyPattern — konsisten engine) ═══════════ */
+function buildGrid(cur){
+  let html = "";
+  for(let h=0;h<3;h++){
+    html += `<div class="g27"><div class="gt">HULU: ${L1NAME[h]}</div><table>`;
+    html += `<tr><td class="ax"></td><td class="ax">D R</td><td class="ax">D S</td><td class="ax">D T</td></tr>`;
+    for(let t=2;t>=0;t--){
+      html += `<tr><td class="ax">T ${L1NAME[t][0]}</td>`;
+      for(let d=0;d<3;d++){
+        const kls = classifyPattern(h,t,d)[0];
+        const [code,col] = CODE[kls];
+        const curCell = cur && cur[0]===h && cur[1]===t && cur[2]===d;
+        html += `<td class="${curCell?'cur':''}" style="background:${code==='LOK'?'#e6c34a':col};color:${code==='LOK'?'#5b4a06':'#fff'};${code==='AMN'||code==='CAM'?';color:#fff':''}">${code}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</table></div>`;
+  }
+  return html;
+}
+$("grid27").innerHTML = buildGrid(null);
+
+/* ═══════════ controls ═══════════ */
+function syncOutputs(){
+  $("oValve").textContent = Math.round(S.valve*100) + " %";
+  $("oGate").textContent  = Math.round(S.gate*100) + " %";
+  $("oRainH").textContent = (+S.rain[0]).toFixed(1);
+  $("oRainT").textContent = (+S.rain[1]).toFixed(1);
+  $("oRainD").textContent = (+S.rain[2]).toFixed(1);
+}
+$("iValve").addEventListener("input", e => { S.valve = e.target.value/100; syncOutputs(); clearPreset(); });
+$("iGate").addEventListener("input",  e => { S.gate  = e.target.value/100; syncOutputs(); clearPreset(); });
+$("iRainH").addEventListener("input", e => { S.rain[0] = +e.target.value; syncOutputs(); clearPreset(); });
+$("iRainT").addEventListener("input", e => { S.rain[1] = +e.target.value; syncOutputs(); clearPreset(); });
+$("iRainD").addEventListener("input", e => { S.rain[2] = +e.target.value; syncOutputs(); clearPreset(); });
+function clearPreset(){ document.querySelectorAll("#presets button").forEach(b => b.classList.remove("active")); }
+$("presets").addEventListener("click", e => {
+  const code = e.target.dataset.s; if(!code) return;
+  const p = PRESETS[code];
+  S.valve = p.valve; S.gate = p.gate; S.rain = p.rain.slice();
+  $("iValve").value = Math.round(p.valve*100);
+  $("iGate").value  = Math.round(p.gate*100);
+  $("iRainH").value = p.rain[0]; $("iRainT").value = p.rain[1]; $("iRainD").value = p.rain[2];
+  syncOutputs();
+  document.querySelectorAll("#presets button").forEach(b => b.classList.toggle("active", b.dataset.s === code));
+  $("presetDesc").innerHTML = p.desc;
+});
+$("btnPause").addEventListener("click", () => {
+  S.paused = !S.paused;
+  $("btnPause").textContent = S.paused ? "▶ Lanjut" : "⏸ Jeda";
+});
+$("iSpeed").addEventListener("change", e => S.speed = +e.target.value);
+
+/* ═══════════ hujan animasi ═══════════ */
+const rainPool = [[],[],[]];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ZONE_X = [[90,320],[360,590],[630,860]];
+function stepRain(dt){
+  if(reduceMotion){ els.rainG.forEach(g => g.innerHTML = ""); return; }
+  for(let z=0;z<3;z++){
+    const active = S.rain[z] > 1.0;
+    els.cloud[z].setAttribute("opacity", active ? Math.min(.95, .15 + S.rain[z]/11) : .15);
+    if(active && Math.random() < dt*S.rain[z]*1.5 && rainPool[z].length < 34){
+      rainPool[z].push({x: ZONE_X[z][0]+Math.random()*(ZONE_X[z][1]-ZONE_X[z][0]),
+                        y: 80+Math.random()*20, v: 160+Math.random()*80});
+    }
+    for(let i=rainPool[z].length-1;i>=0;i--){
+      const d = rainPool[z][i]; d.y += d.v*dt; d.x += d.v*dt*0.18;
+      if(d.y > 160 || d.x > ZONE_X[z][1]+30) rainPool[z].splice(i,1);
+    }
+    els.rainG[z].innerHTML = rainPool[z].map(d =>
+      `<line x1="${d.x.toFixed(1)}" y1="${d.y.toFixed(1)}" x2="${(d.x-3).toFixed(1)}" y2="${(d.y-10).toFixed(1)}" stroke="#5dade2" stroke-width="1.4" opacity=".6"/>`).join("");
+  }
+}
+
+/* ═══════════ spark 3 garis ═══════════ */
+const sc = $("spark").getContext("2d");
+function drawSpark(){
+  const w = $("spark").width, h = $("spark").height;
+  sc.clearRect(0,0,w,h);
+  [25,50,75].forEach(v => { const y=h-(v/100)*h; sc.strokeStyle="#e3e6ea";
+    sc.beginPath(); sc.moveTo(0,y); sc.lineTo(w,y); sc.stroke(); });
+  const pts = S.hist.slice(-180);
+  if(pts.length < 2) return;
+  const t0=pts[0].t, t1=pts[pts.length-1].t||1;
+  for(let n=0;n<3;n++){
+    sc.strokeStyle = NODECOL[n]; sc.lineWidth = 1.5; sc.beginPath();
+    pts.forEach((p,i)=>{
+      const x=(p.t-t0)/Math.max(.1,(t1-t0))*(w-4)+2, y=h-(p.lv[n]/100)*(h-6)-3;
+      i?sc.lineTo(x,y):sc.moveTo(x,y);
+    });
+    sc.stroke();
+  }
+}
+
+/* ═══════════ render per frame ═══════════ */
+let last = performance.now();
+function frame(now){
+  const dtReal = Math.min(.05,(now-last)/1000); last = now;
+  let out = null;
+  if(!S.paused){
+    out = step(dtReal * S.speed);
+    if(S.t - S.lastHist >= 2){
+      S.lastHist = S.t;
+      S.hist.push({t:S.t, lv:S.depth.map(d=>d/CHAN*100)});
+      if(S.hist.length > 400) S.hist.shift();
+    }
+    stepRain(dtReal * S.speed);
+  }
+  /* hitung inferensi tiap frame (murah) */
+  const lv = S.depth.map(d => d/CHAN*100);
+  const iq = out ? out.map(o=>o/QREF) : S.depth.map(()=>1);
+  const risks = lv.map((l,i) => riskLayer1(l, iq[i], S.rain[i]).risk);
+  const sts = risks.map(r => status4(r));
+  const l1 = risks.map(r => levelL1(r));
+  const [kls, konf] = classifyPattern(l1[0], l1[1], l1[2], iq[2]*QREF, QREF, lv[2]);
+
+  /* panel */
+  $("classChip").textContent = kls; $("classChip").className = "k-" + kls;
+  $("patternTri").textContent = `(H,T,D)=(${l1[0]},${l1[1]},${l1[2]})`;
+  $("aksiTxt").innerHTML = `<b>Tindakan:</b> ${AKSI[kls]}<br><span style="color:var(--muted)">${KELAS_DESC[kls]}</span>`;
+  $("konfTxt").textContent = konf || "";
+  for(let i=0;i<3;i++){
+    els.st[i].textContent = sts[i];
+    els.st[i].style.background = STCOL[sts[i]];
+    els.l1[i].textContent = "L1: " + L1NAME[l1[i]];
+    els.lv[i].textContent = lv[i].toFixed(0) + " %";
+    els.iq[i].textContent = iq[i].toFixed(2);
+    els.rk[i].textContent = risks[i].toFixed(1);
+    els.lamp[i].setAttribute("fill", STCOL[sts[i]]);
+    els.gauge[i].setAttribute("fill", STCOL[sts[i]]);
+  }
+  $("simClock").textContent = "t = " + Math.floor(S.t/60) + ":" + String(Math.floor(S.t%60)).padStart(2,"0");
+
+  /* stage: air, beam, gauge, gate, desa */
+  for(let i=0;i<3;i++){
+    const hh = Math.max(2, lv[i]/100*MAXH);
+    els.w[i].setAttribute("y", (BEAMY2[i]-hh).toFixed(1));
+    els.w[i].setAttribute("height", hh.toFixed(1));
+    const surfY = BEAMY2[i]-hh;
+    const [bx, by] = POSTBEAM[i];
+    els.beam[i].setAttribute("y2", surfY.toFixed(1));
+    const dmm = 340 - S.depth[i];
+    els.beamTxt[i].textContent = "d=" + dmm.toFixed(0) + "mm";
+    els.beamTxt[i].setAttribute("y", ((surfY+by)/2).toFixed(0));
+    const gh = l1[i] === 2 ? 26 : l1[i] === 1 ? 16 : 6;
+    els.gauge[i].setAttribute("height", gh);
+  }
+  $("gateBar").setAttribute("y", (356 - (1-S.gate)*72).toFixed(0));
+  $("gateBar").setAttribute("height", Math.max(3, S.gate*0 + 4 + (1-S.gate)*0).toFixed(0));
+  const ov = S.depth[2] >= CHAN-1;
+  $("ovD").setAttribute("opacity", ov ? .9 : 0);
+  $("ovTxt").setAttribute("opacity", ov ? 1 : 0);
+  $("evacTxt").setAttribute("opacity", sts[2] === "BAHAYA" ? 1 : 0);
+  $("village").setAttribute("opacity", sts[2] === "BAHAYA" ? .95 : 1);
+  $("valveHandle").setAttribute("transform", `rotate(${-90 + S.valve*90} 66 286)`);
+
+  if(S.t - S.lastGrid > .5){ S.lastGrid = S.t; $("grid27").innerHTML = buildGrid(l1); }
+  drawSpark();
+  requestAnimationFrame(frame);
+}
+syncOutputs();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

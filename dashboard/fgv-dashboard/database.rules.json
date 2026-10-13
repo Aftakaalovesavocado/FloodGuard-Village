@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "fgv": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FGV Testbed Kaskade — Simulasi Konsep</title>
+<style>
+  body {
+    margin: 0; padding: 16px 20px;
+    color: var(--foreground, #e8e8e8);
+    background: var(--card, #16181d);
+    font-size: 14px;
+  }
+  h1 { font-size: 17px; margin: 0 0 2px; }
+  .sub { color: var(--muted-foreground, #9a9a9a); font-size: 12.5px; margin-bottom: 12px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  button {
+    background: var(--card, #16181d); color: var(--foreground, #e8e8e8);
+    border: 1px solid var(--border, #4a4a55); border-radius: 8px;
+    padding: 7px 13px; cursor: pointer; font-size: 13px;
+  }
+  button:hover { border-color: var(--accent, #4aa3ff); }
+  button.active { background: var(--accent, #4aa3ff); color: #fff; border-color: var(--accent, #4aa3ff); }
+  svg { width: 100%; height: auto; display: block; }
+  text { font-family: inherit; }
+  .banner {
+    border: 1px solid var(--border, #4a4a55); border-left: 4px solid var(--accent, #4aa3ff);
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 13.5px;
+  }
+  .banner b.kelas { font-size: 14.5px; letter-spacing: .4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+  .panel { border: 1px solid var(--border, #3a3a44); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; }
+  .panel h3 { margin: 0 0 6px; font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  td { padding: 2px 6px; border-bottom: 1px dashed var(--border, #33333c); }
+  td:last-child { text-align: right; color: var(--muted-foreground, #9a9a9a); }
+  ul { margin: 4px 0 0; padding-left: 18px; }
+  li { margin: 3px 0; }
+  .flow { animation: dash 1s linear infinite; }
+  .flow.fast { animation-duration: .45s; }
+  .flow.slow { animation-duration: 2.6s; }
+  .flow.off  { opacity: .12; animation-duration: 6s; }
+  @keyframes dash { to { stroke-dashoffset: -22; } }
+  .drop { animation: fall 1s linear infinite; }
+  @keyframes fall {
+    0%   { transform: translateY(0); opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateY(var(--fall, 56px)); opacity: 0; }
+  }
+  .badge { transition: all .4s; }
+</style>
+</head>
+<body>
+
+<h1>FGV Testbed Kaskade Bertingkat — simulasi konsep (v2)</h1>
+<div class="sub">3 tingkat (30/20/10 cm) · pipa custom 40×20 mm · tampungan + stilling well · sirkulasi tertutup · <i>proporsi disesuaikan agar terbaca, bukan skala persis</i></div>
+
+<div class="bar" id="btns">
+  <button data-s="S1" class="active">S1 · Normal</button>
+  <button data-s="S2">S2 · Hujan (injeksi BMKG)</button>
+  <button data-s="S3">S3 · Banjir kiriman</button>
+  <button data-s="S4">S4 · Sumbatan hilir</button>
+  <button data-s="S5">S5 · Banjir lokal</button>
+</div>
+
+<svg viewBox="0 0 1250 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="var(--muted-foreground, #9a9a9a)"/>
+    </marker>
+  </defs>
+
+  <!-- ═══ DASAR / RESERVOIR 1 m ═══ -->
+  <line x1="60" y1="660" x2="1210" y2="660" stroke="var(--border,#3a3a44)" stroke-width="2"/>
+  <text x="60" y="680" font-size="11" fill="var(--muted-foreground,#9a9a9a)">dasar / lantai</text>
+
+  <g>
+    <rect x="280" y="575" width="900" height="14" fill="none" stroke="var(--border,#555562)" stroke-width="3"/>
+    <rect x="280" y="589" width="14" height="60" fill="none" stroke="var(--border,#555562)" stroke-width="3"/>
+    <rect x="1166" y="589" width="14" height="60" fill="none" stroke="var(--border,#555562)" stroke-width="3"/>
+    <rect id="resWater" x="286" y="600" width="874" height="46" fill="#38bdf8" opacity="0.35"/>
+    <rect x="286" y="600" width="874" height="3" fill="#7dd3fc"/>
+    <text x="730" y="668" font-size="12" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">wadah besar / reservoir ±1 m (wadah air balik sirkulasi)</text>
+    <line x1="280" y1="650" x2="1180" y2="650" stroke="var(--muted-foreground,#8a8a95)" stroke-dasharray="4 3" marker-end="url(#arw)"/>
+    <text x="730" y="647" font-size="10.5" text-anchor="middle" fill="var(--muted-foreground,#8a8a95)">±100 cm</text>
+  </g>
+
+  <!-- ═══ POMPA + SELANG ═══ -->
+  <rect x="330" y="596" width="46" height="34" rx="4" fill="var(--card,#16181d)" stroke="var(--border,#66667a)" stroke-width="2"/>
+  <text x="353" y="618" font-size="10" text-anchor="middle" fill="var(--foreground,#e8e8e8)">pompa</text>
+  <path d="M353,596 L353,190 L580,190 L580,212" fill="none" stroke="var(--border,#66667a)" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M353,596 L353,190 L580,190 L580,212" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="10 8" class="flow" id="hoseFlow"/>
+  <text x="452" y="182" font-size="10.5" fill="var(--muted-foreground,#9a9a9a)">selang + ball valve (pengatur debit 5–15 L/menit)</text>
+
+  <!-- ═══ DEK / RANGKA (susunan tangga) ═══ -->
+  <g stroke="var(--border,#555562)" stroke-width="5">
+    <line x1="340" y1="304" x2="660" y2="304"/>
+    <line x1="380" y1="304" x2="380" y2="600"/>
+    <line x1="620" y1="304" x2="620" y2="600"/>
+    <line x1="600" y1="384" x2="920" y2="384"/>
+    <line x1="640" y1="384" x2="640" y2="600"/>
+    <line x1="880" y1="384" x2="880" y2="600"/>
+    <line x1="860" y1="464" x2="1180" y2="464"/>
+    <line x1="900" y1="464" x2="900" y2="600"/>
+    <line x1="1140" y1="464" x2="1140" y2="600"/>
+  </g>
+  <text x="330" y="298" font-size="11" text-anchor="end" fill="var(--muted-foreground,#9a9a9a)">tingkat 1 · 30 cm</text>
+  <text x="590" y="378" font-size="11" text-anchor="end" fill="var(--muted-foreground,#9a9a9a)">tingkat 2 · 20 cm</text>
+  <text x="850" y="458" font-size="11" text-anchor="end" fill="var(--muted-foreground,#9a9a9a)">tingkat 3 · 10 cm</text>
+
+  <!-- ═══ PIPA KOTAK CUSTOM 40x20 (30 cm per tingkat) ═══ -->
+  <g id="pipes">
+    <!-- P1 -->
+    <polygon points="380,284 560,287 560,297 380,294" fill="var(--card,#16181d)" stroke="var(--border,#66667a)" stroke-width="2"/>
+    <polygon id="pw1" points="383,290 557,293 557,296 383,293" fill="#38bdf8" opacity="0.55"/>
+    <line x1="388" y1="291" x2="556" y2="294" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="7 6" class="flow" id="pf1"/>
+    <!-- P2 -->
+    <polygon points="640,364 820,367 820,377 640,374" fill="var(--card,#16181d)" stroke="var(--border,#66667a)" stroke-width="2"/>
+    <polygon id="pw2" points="643,370 817,373 817,376 643,373" fill="#38bdf8" opacity="0.55"/>
+    <line x1="648" y1="371" x2="816" y2="374" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="7 6" class="flow" id="pf2"/>
+    <!-- P3 -->
+    <polygon points="900,444 1080,447 1080,457 900,454" fill="var(--card,#16181d)" stroke="var(--border,#66667a)" stroke-width="2"/>
+    <polygon id="pw3" points="903,450 1077,453 1077,456 903,453" fill="#38bdf8" opacity="0.55"/>
+    <line x1="908" y1="451" x2="1076" y2="454" stroke="#7dd3fc" stroke-width="2" stroke-dasharray="7 6" class="flow" id="pf3"/>
+  </g>
+  <text x="470" y="278" font-size="10.5" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">pipa custom 40×20 mm — 30 cm</text>
+  <line x1="380" y1="312" x2="560" y2="312" stroke="var(--muted-foreground,#8a8a95)" stroke-dasharray="4 3" marker-end="url(#arw)"/>
+  <text x="470" y="325" font-size="10.5" text-anchor="middle" fill="var(--muted-foreground,#8a8a95)">30 cm</text>
+
+  <!-- inset: potongan pipa -->
+  <g transform="translate(238,120)">
+    <rect x="0" y="0" width="118" height="86" rx="6" fill="var(--card,#16181d)" stroke="var(--border,#555562)" stroke-width="1.5"/>
+    <rect x="14" y="26" width="90" height="40" fill="none" stroke="var(--border,#66667a)" stroke-width="2"/>
+    <rect x="16" y="41" width="86" height="23" fill="#38bdf8" opacity="0.5"/>
+    <line x1="10" y1="66" x2="108" y2="66" stroke="var(--muted-foreground,#9a9a9a)" stroke-dasharray="3 2"/>
+    <text x="59" y="80" font-size="9.5" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">potongan 40 × 20 mm</text>
+    <text x="59" y="20" font-size="9.5" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">air 35–82% tinggi pipa</text>
+    <path d="M118,60 C 200,80 300,150 380,272" fill="none" stroke="var(--border,#555562)" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- ═══ TAMPGUNAN + GATE ═══ -->
+  <g stroke="var(--border,#66667a)" stroke-width="4" fill="none">
+    <path d="M560,205 L560,300 L640,300 L640,205"/>
+    <path d="M820,285 L820,380 L900,380 L900,285"/>
+    <path d="M1080,365 L1080,460 L1160,460 L1160,365"/>
+  </g>
+  <!-- air tampungan (dianimasikan) -->
+  <rect id="tw1" x="565" y="262" width="70" height="34" fill="#38bdf8" opacity="0.6"/>
+  <rect id="tw2" x="825" y="342" width="70" height="34" fill="#38bdf8" opacity="0.6"/>
+  <rect id="tw3" x="1085" y="422" width="70" height="34" fill="#38bdf8" opacity="0.6"/>
+  <!-- permukaan -->
+  <rect id="ts1" x="565" y="262" width="70" height="2.5" fill="#7dd3fc"/>
+  <rect id="ts2" x="825" y="342" width="70" height="2.5" fill="#7dd3fc"/>
+  <rect id="ts3" x="1085" y="422" width="70" height="2.5" fill="#7dd3fc"/>
+
+  <!-- gate -->
+  <rect id="g1" x="640" y="268" width="7" height="26" fill="var(--foreground,#e8e8e8)" opacity="0.85"/>
+  <rect id="g2" x="900" y="348" width="7" height="26" fill="var(--foreground,#e8e8e8)" opacity="0.85"/>
+  <rect id="g3" x="1160" y="428" width="7" height="26" fill="var(--foreground,#e8e8e8)" opacity="0.85"/>
+  <text x="1178" y="418" font-size="10" fill="var(--muted-foreground,#9a9a9a)">gate</text>
+  <text x="1178" y="430" font-size="10" fill="var(--muted-foreground,#9a9a9a)">(kontrol</text>
+  <text x="1178" y="442" font-size="10" fill="var(--muted-foreground,#9a9a9a)">skenario)</text>
+
+  <text x="600" y="198" font-size="10" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">tampungan 100×150 mm</text>
+
+  <!-- ═══ STILLING WELL + JSN ═══ -->
+  <g id="wells">
+    <!-- W1 -->
+    <rect x="576" y="85" width="36" height="192" rx="5" fill="none" stroke="var(--accent,#4aa3ff)" stroke-width="2.5"/>
+    <line x1="576" y1="206" x2="612" y2="206" stroke="#f97316" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="622" y="120" font-size="10" fill="var(--muted-foreground,#9a9a9a)">stilling well PVC 2" (±28 cm)</text>
+    <text x="622" y="133" font-size="10" fill="#f97316">blind zone 20 cm — terpenuhi ✔</text>
+    <rect x="566" y="64" width="56" height="22" rx="4" fill="var(--card,#16181d)" stroke="var(--accent,#4aa3ff)" stroke-width="2"/>
+    <text x="594" y="79" font-size="10" text-anchor="middle" fill="var(--foreground,#e8e8e8)">JSN 1</text>
+    <!-- W2 -->
+    <rect x="836" y="165" width="36" height="192" rx="5" fill="none" stroke="var(--accent,#4aa3ff)" stroke-width="2.5"/>
+    <line x1="836" y1="286" x2="872" y2="286" stroke="#f97316" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="826" y="144" width="56" height="22" rx="4" fill="var(--card,#16181d)" stroke="var(--accent,#4aa3ff)" stroke-width="2"/>
+    <text x="854" y="159" font-size="10" text-anchor="middle" fill="var(--foreground,#e8e8e8)">JSN 2</text>
+    <!-- W3 -->
+    <rect x="1096" y="245" width="36" height="192" rx="5" fill="none" stroke="var(--accent,#4aa3ff)" stroke-width="2.5"/>
+    <line x1="1096" y1="366" x2="1132" y2="366" stroke="#f97316" stroke-width="2" stroke-dasharray="5 4"/>
+    <rect x="1086" y="224" width="56" height="22" rx="4" fill="var(--card,#16181d)" stroke="var(--accent,#4aa3ff)" stroke-width="2"/>
+    <text x="1114" y="239" font-size="10" text-anchor="middle" fill="var(--foreground,#e8e8e8)">JSN 3</text>
+  </g>
+  <text x="594" y="52" font-size="10" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">sensor di ATAS tampungan, bukan tengah pipa:</text>
+  <text x="594" y="40" font-size="10" text-anchor="middle" fill="var(--muted-foreground,#9a9a9a)">beam ±30° → Ø≈46 cm @ 23 cm &gt; panjang pipa 30 cm</text>
+
+  <!-- ═══ WATERFALL antar tingkat ═══ -->
+  <line x1="644" y1="304" x2="644" y2="362" stroke="var(--border,#555562)" stroke-dasharray="3 3"/>
+  <line x1="904" y1="384" x2="904" y2="442" stroke="var(--border,#555562)" stroke-dasharray="3 3"/>
+  <line x1="1164" y1="464" x2="1164" y2="596" stroke="var(--border,#555562)" stroke-dasharray="3 3"/>
+  <g fill="#7dd3fc">
+    <circle class="drop" cx="644" cy="306" r="3" style="--fall:52px; animation-delay:0s"/>
+    <circle class="drop" cx="644" cy="306" r="3" style="--fall:52px; animation-delay:.33s"/>
+    <circle class="drop" cx="644" cy="306" r="3" style="--fall:52px; animation-delay:.66s"/>
+    <circle class="drop" cx="904" cy="386" r="3" style="--fall:52px; animation-delay:.15s"/>
+    <circle class="drop" cx="904" cy="386" r="3" style="--fall:52px; animation-delay:.5s"/>
+    <circle class="drop" cx="904" cy="386" r="3" style="--fall:52px; animation-delay:.83s"/>
+    <circle class="drop" cx="1164" cy="466" r="3" style="--fall:126px; animation-delay:0s"/>
+    <circle class="drop" cx="1164" cy="466" r="3" style="--fall:126px; animation-delay:.4s"/>
+  </g>
+  <text x="655" y="336" font-size="10" fill="var(--muted-foreground,#9a9a9a)">jatuh ±10 cm → lag alami antar tingkat</text>
+
+  <!-- ═══ BADGE STATUS NODE ═══ -->
+  <g font-size="11" text-anchor="middle">
+    <rect id="b1" class="badge" x="552" y="12" width="86" height="22" rx="11" fill="#22c55e" opacity="0.9"/>
+    <text id="b1t" x="595" y="27" fill="#08260f" font-weight="bold">HULU · AMAN</text>
+    <rect id="b2" class="badge" x="812" y="12" width="96" height="22" rx="11" fill="#22c55e" opacity="0.9"/>
+    <text id="b2t" x="860" y="27" fill="#08260f" font-weight="bold">TENGAH · AMAN</text>
+    <rect id="b3" class="badge" x="1072" y="12" width="86" height="22" rx="11" fill="#22c55e" opacity="0.9"/>
+    <text id="b3t" x="1115" y="27" fill="#08260f" font-weight="bold">HILIR · AMAN</text>
+  </g>
+  <text id="rainIcon" x="720" y="30" font-size="20" visibility="hidden">🌧️</text>
+
+  <!-- catatan samping kanan -->
+  <g font-size="10.5" fill="var(--muted-foreground,#9a9a9a)">
+    <text x="1235" y="205" text-anchor="end">Mistar permanen di dinding pipa</text>
+    <text x="1235" y="218" text-anchor="end">= kalibrasi Manning manual</text>
+    <text x="1235" y="231" text-anchor="end">(JSN tidak bisa baca air 9–15 mm)</text>
+  </g>
+</svg>
+
+<div class="banner" id="banner">
+  <b class="kelas" id="bKelas">S1 · AMAN</b><span id="bAksi"> — kondisi baseline; semua gate normal, valve 50%. Data run ini dipakai menetapkan Q_ref per node.</span>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>Parameter operasi (hasil hitung Manning)</h3>
+    <table>
+      <tr><td>Pipa custom</td><td>40 × 20 mm, 30 cm/tingkat, S = 1%</td></tr>
+      <tr><td>Kapasitas pipa (full)</td><td>22.3 L/menit @ S=1% (15.8 @ S=0.5%)</td></tr>
+      <tr><td>Q operasi (valve)</td><td>5 – 15 L/menit → air 35–82% tinggi pipa</td></tr>
+      <tr><td>Kedalaman di pipa</td><td>7–16 mm → <b>terlalu dangkal untuk JSN (±10 mm)</b></td></tr>
+      <tr><td>Level sistem</td><td>JSN + stilling well di tampungan (chan 120 mm)</td></tr>
+      <tr><td>Residence time tampungan</td><td>12–36 detik (gelombang terlihat merambat)</td></tr>
+      <tr><td>Ruang vertikal sensor</td><td>±25 cm → susunan tangga, tampungan di tepi luar</td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h3>Kenapa beberapa keputusan diubah dari konsep awal</h3>
+    <ul>
+      <li><b>Sensor pindah ke atas tampungan</b> — beam JSN ±30° membentuk lingkaran pantulan Ø≈46 cm pada jarak 23 cm, lebih lebar dari pipa (30 cm) → echo dinding. Stilling well PVC 2" memandu beam + meredam riak.</li>
+      <li><b>Susunan tangga, bukan tumpuk lurus</b> — stilling well butuh ±25 cm ruang vertikal; jarak antar dek 10 cm tidak cukup kalau sensor berada di bawah dek atas.</li>
+      <li><b>Kemiringan pipa 1%</b> — di 0.5% pipa 20 mm penuh pada Q≈16 L/menit → aliran surcharged, Manning tidak berlaku.</li>
+      <li><b>Gate di outlet tampungan</b> — menaikkan muka air (40–120 mm) sekaligus jadi saklar skenario sumbatan.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  var BOT1 = 300, BOT2 = 380, BOT3 = 460;      // dasar tampungan (y svg)
+  var H = 95;                                   // tinggi tampungan 150mm ≈ 95px
+  var MINY = 12;                                // level minimal (air ~2px)
+
+  var els = {
+    w: [document.getElementById('tw1'), document.getElementById('tw2'), document.getElementById('tw3')],
+    s: [document.getElementById('ts1'), document.getElementById('ts2'), document.getElementById('ts3')],
+    bot: [BOT1, BOT2, BOT3],
+    badges: [document.getElementById('b1'), document.getElementById('b2'), document.getElementById('b3')],
+    btexts: [document.getElementById('b1t'), document.getElementById('b2t'), document.getElementById('b3t')],
+    flows: [document.getElementById('pf1'), document.getElementById('pf2'), document.getElementById('pf3')],
+    g3: document.getElementById('g3'),
+    rain: document.getElementById('rainIcon'),
+    kelas: document.getElementById('bKelas'),
+    aksi: document.getElementById('bAksi')
+  };
+  var COLORS = { AMAN: '#22c55e', WASPADA: '#eab308', SIAGA: '#f97316', BAHAYA: '#ef4444' };
+  var TCOL = { AMAN: '#08260f', WASPADA: '#2a2205', SIAGA: '#2a1405', BAHAYA: '#2a0606' };
+  var NAMA = ['HULU', 'TENGAH', 'HILIR'];
+  var token = 0;
+  var cur = [40, 40, 40];   // persen level tampungan saat ini
+
+  function pct2y(bot, pct) { return bot - MINY - (H - MINY) * (pct / 100); }
+
+  function tween(i, target, ms) {
+    var start = cur[i], t0 = null, my = ++token;   // token per tween supaya bisa saling membatalkan
+    return new Promise(function (res) {
+      function step(ts) {
+        if (my !== token) return res();
+        if (!t0) t0 = ts;
+        var k = Math.min(1, (ts - t0) / ms);
+        var e = 1 - Math.pow(1 - k, 3);
+        var p = start + (target - start) * e;
+        setLevel(i, p);
+        if (k < 1) requestAnimationFrame(step); else { cur[i] = target; res(); }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function setLevel(i, pct) {
+    cur[i] = pct;
+    var y = pct2y(els.bot[i], pct);
+    els.w[i].setAttribute('y', y);
+    els.w[i].setAttribute('height', els.bot[i] - y);
+    els.s[i].setAttribute('y', y);
+  }
+
+  function setStatus(i, st) {
+    els.badges[i].setAttribute('fill', COLORS[st]);
+    els.btexts[i].textContent = NAMA[i] + ' · ' + st;
+  }
+
+  function flow(i, mode) {
+    els.flows[i].setAttribute('class', 'flow ' + mode);
+  }
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  function banner(kelas, warna, aksi) {
+    els.kelas.textContent = kelas;
+    els.kelas.style.color = warna;
+    els.aksi.textContent = ' — ' + aksi;
+  }
+
+  var SCEN = {
+    S1: function () {
+      els.rain.setAttribute('visibility', 'hidden');
+      els.g3.setAttribute('y', 428);
+      flow(0, ''); flow(1, ''); flow(2, '');
+      banner('S1 · AMAN', COLORS.AMAN, 'kondisi baseline; semua gate normal, valve 50%. Data run ini dipakai menetapkan Q_ref per node.');
+      return Promise.all([tween(0, 40, 700), tween(1, 40, 700), tween(2, 40, 700)])
+        .then(function () { [0, 1, 2].forEach(function (i) { setStatus(i, 'AMAN'); }); });
+    },
+    S2: function () {
+      els.rain.setAttribute('visibility', 'visible');
+      flow(0, ''); flow(1, ''); flow(2, '');
+      banner('S2 · SIAGA (prakiraan hujan)', COLORS.SIAGA, 'tp diinjeksi 0.2 → 8.0 mm/3jam di gateway. PERHATIKAN: muka air TIDAK berubah — status naik murni dari leading indicator. Inilah bukti sistem prediktif.');
+      return Promise.all([tween(0, 41, 700), tween(1, 41, 700), tween(2, 41, 700)])
+        .then(function () { [0, 1, 2].forEach(function (i) { setStatus(i, 'SIAGA'); }); });
+    },
+    S3: function () {
+      els.rain.setAttribute('visibility', 'hidden');
+      els.g3.setAttribute('y', 428);
+      flow(0, 'fast'); flow(1, ''); flow(2, '');
+      banner('S3 · KIRIMAN_HULU', COLORS.SIAGA, 'valve dibuka penuh mendadak → gelombang merambat T1 → T2 → T3 (lag 12–36 detik per tampungan). Waktu mulai naik tiap node = lag time terukur.');
+      return tween(0, 68, 900).then(function () {
+        setStatus(0, 'SIAGA'); flow(0, ''); flow(1, 'fast');
+        return tween(1, 55, 900);
+      }).then(function () {
+        setStatus(1, 'WASPADA'); flow(1, ''); flow(2, 'fast');
+        return tween(2, 48, 900);
+      }).then(function () {
+        setStatus(2, 'WASPADA'); flow(2, '');
+      });
+    },
+    S4: function () {
+      els.rain.setAttribute('visibility', 'hidden');
+      flow(0, ''); flow(1, ''); flow(2, 'slow');
+      banner('S4 · BACKWATER', COLORS.BAHAYA, 'gate hilir ditutup parsial → level hilir melonjak sementara debit efektif hilir TURUN. Classifier memicu: kirim tim cek fisik sumbatan.');
+      els.g3.setAttribute('y', 444);
+      return Promise.all([tween(0, 40, 600), tween(1, 42, 600), tween(2, 92, 1100)])
+        .then(function () {
+          setStatus(0, 'AMAN'); setStatus(1, 'WASPADA'); setStatus(2, 'BAHAYA');
+        });
+    },
+    S5: function () {
+      els.rain.setAttribute('visibility', 'hidden');
+      els.g3.setAttribute('y', 428);
+      flow(0, ''); flow(1, ''); flow(2, '');
+      banner('S5 · LOKAL', COLORS.WASPADA, 'air disiram hanya di segmen tengah → hanya node TENGAH yang naik. Hulu & hilir tetap AMAN.');
+      return Promise.all([tween(0, 40, 600), tween(1, 66, 900), tween(2, 40, 600)])
+        .then(function () {
+          setStatus(0, 'AMAN'); setStatus(1, 'WASPADA'); setStatus(2, 'AMAN');
+        });
+    }
+  };
+
+  var btns = document.getElementById('btns');
+  btns.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    token++;                       // batalkan semua tween berjalan
+    [].forEach.call(btns.children, function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    SCEN[b.dataset.s]();
+  });
+
+  SCEN.S1();
+})();
+</script>
+</body>
+</html>
