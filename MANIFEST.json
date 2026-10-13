@@ -1,7 +1,12 @@
 {
   "package": "FloodGuard Village (FGV) — SOBAT Competition 2026",
-  "generated_at": "2026-10-13 21:37:54 +0700",
+  "generated_at": "2026-10-13 21:41:10 +0700",
   "files": [
+    {
+      "path": ".gitattributes",
+      "size_bytes": 98,
+      "sha256": "5aac977c084ebe725ecf50ade9fcb691c8bbea59484615f132429687ca3aae2a"
+    },
     {
       "path": ".gitignore",
       "size_bytes": 250,
@@ -14,13 +19,13 @@
     },
     {
       "path": "config/secrets.example.h",
-      "size_bytes": 346,
-      "sha256": "53de9313e3e84383c3644d9f8e95254b4b18a833fa44036cf9d93ac68de82958"
+      "size_bytes": 339,
+      "sha256": "224846b213119991f756c2e033f0cda5aeb3b51a2bd92e7a2086d954a169aa65"
     },
     {
       "path": "dashboard/fgv-dashboard/database.rules.json",
-      "size_bytes": 92,
-      "sha256": "dcb8375b080e73f703679e14f93437c563de96921d4438c044439e7beceb26a2"
+      "size_bytes": 84,
+      "sha256": "25b8e16714c58d085d34dd9bfa566c764a6eaf0e97916a5f9277b20f38708e30"
     },
     {
       "path": "dashboard/fgv-dashboard/firebase.json",
@@ -29,13 +34,13 @@
     },
     {
       "path": "dashboard/fgv-dashboard/index_dark_backup.html",
-      "size_bytes": 33444,
-      "sha256": "9ca42d41ec8082dc08256082e0e5c0b444c63ce0af037a21617bab17847b19df"
+      "size_bytes": 32932,
+      "sha256": "81a549db199257fff4e46bb98fe29df32ce927a103ba82452fee37edd24b14bb"
     },
     {
       "path": "dashboard/fgv-dashboard/index_v1_backup.html",
-      "size_bytes": 27710,
-      "sha256": "4339a751caeaf0ed162e48b59f52f132d5baec11378bea14df73ddb4ff321e31"
+      "size_bytes": 27270,
+      "sha256": "89c7264e3e80dbbc0c6820bff5a42525638c89a6dedffc50cb00751a0ccd8967"
     },
     {
       "path": "dashboard/fgv-dashboard/public/assets/logo.png",
@@ -44,8 +49,8 @@
     },
     {
       "path": "dashboard/fgv-dashboard/public/index.html",
-      "size_bytes": 40657,
-      "sha256": "79211dcc6094481f22eeee2c41d615fafa330baed9904bb0f1daa9db3c609560"
+      "size_bytes": 40007,
+      "sha256": "121362ccfebe51661b6ba5caf98711633ba6033f64aeaf908fc4ae66084dcc52"
     },
     {
       "path": "dashboard/fgv-dashboard/server.js",
@@ -54,18 +59,18 @@
     },
     {
       "path": "dashboard/flood-dashboard-server/package.json",
-      "size_bytes": 317,
-      "sha256": "fe68f5ad00ae00a541dd28e60a8441ce99a4eec2a3f744f5a326b3439dee0f55"
+      "size_bytes": 302,
+      "sha256": "6c7cd97b6fd37ec3aa8c35a16dbb79ef2c35b40a70b337bcffc0bbf2e0d94009"
     },
     {
       "path": "dashboard/flood-dashboard-server/public/index.html",
-      "size_bytes": 18485,
-      "sha256": "70e7abbd3c7c7720ebcdc8ef9b00a3c69a6a349d4079c3f7a71642b6ebd76f34"
+      "size_bytes": 17930,
+      "sha256": "f7064789adbda00097d2dc542b27135a085f7c0a6d8b792fdc7abd4c6003ac98"
     },
     {
       "path": "dashboard/flood-dashboard-server/README.md",
-      "size_bytes": 2851,
-      "sha256": "9379208f39a56a9bcc461fc1bc4a1328914ebc79c670390c1376fb4fb22a334d"
+      "size_bytes": 2774,
+      "sha256": "b14c9cd347d0813300a5eeaab57713f85735523fb04497dea5b86e2012364f0f"
     },
     {
       "path": "dashboard/flood-dashboard-server/server.js",
@@ -79,8 +84,8 @@
     },
     {
       "path": "docs/BOM_PENGADAAN.md",
-      "size_bytes": 8122,
-      "sha256": "25ee1d120a8e93ae48d243d3d3a0065132fd464c5920b86acc74038cd38044a5"
+      "size_bytes": 8010,
+      "sha256": "b4746a497141b4b1ad8ea7a86f3ef24e1e407d481b5fdc850075e60032a2245e"
     },
     {
       "path": "docs/DESAIN_TESTBED.md",
@@ -89,8 +94,8 @@
     },
     {
       "path": "docs/KALIBRASI_BMKG.md",
-      "size_bytes": 6748,
-      "sha256": "fe99d910ad35f6fd2d56ed1337159e0f008c3176261079cd2fea4109903c39b1"
+      "size_bytes": 6633,
+      "sha256": "321abe952fea929f74b957baca924042a7e4f427fb483cc444651405fcad989c"
     },
     {
       "path": "docs/KALIBRASI_MANNING.md",
@@ -99,8 +104,8 @@
     },
     {
       "path": "docs/LISTING_MEDIAN.md",
-      "size_bytes": 5992,
-      "sha256": "b3c1ce26ed18b99d9825e11e3d4dbe44f59c7433feb727a2f73766dce36d2649"
+      "size_bytes": 5918,
+      "sha256": "e35391de549d38932d8d8267ee98cba70ba9ce7fc8f7584b938295a4b2389e70"
     },
     {
       "path": "docs/PLAN_ROADMAP.md",
@@ -134,8 +139,8 @@
     },
     {
       "path": "firmware/gateway_fgv_v3/gateway_fgv_v3.ino",
-      "size_bytes": 28192,
-      "sha256": "a2255584d54cf2e55c93cb431d3dc7a3180b1c6351a48ac6e79e68e16448477a"
+      "size_bytes": 27562,
+      "sha256": "c79f285e981245e3b9e9f6386dacf7d24b0bccf8e4c39c4fca7f58bd34f7ace7"
     },
     {
       "path": "firmware/gateway_fgv_v3/pattern_layer2.h",
@@ -154,8 +159,8 @@
     },
     {
       "path": "firmware/gateway_fgv_v4/gateway_fgv_v4.ino",
-      "size_bytes": 51422,
-      "sha256": "5d00a163bf90a4a0752c8bfd74bafe0afeae901ee11e4ac67e0f7f048037153a"
+      "size_bytes": 50246,
+      "sha256": "03ebe941111c5123fc4f4fb185113936263e28f49c8a496f533cf9b6df37f13d"
     },
     {
       "path": "firmware/gateway_fgv_v4/pattern_layer2.h",
@@ -284,8 +289,8 @@
     },
     {
       "path": "LICENSE",
-      "size_bytes": 1107,
-      "sha256": "a5d9a2d058109de51864cbb8e82e6370b7b41c306d3e8ae169f0dd3e118d96d4"
+      "size_bytes": 1087,
+      "sha256": "58b1f412dd8d899e5a8158456f4860b3e5fa47a9a71ebffc1169705364c4fd67"
     },
     {
       "path": "MANIFEST.md",
